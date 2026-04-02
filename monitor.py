@@ -201,9 +201,15 @@ ANALYSIS_PROMPT = """이 뉴스 기사 이미지를 분석하여 다음 브랜�
 
 특히 사람이 쓰고 있는 '모자'에 주목해주세요.
 
+중요: 로고가 모자이크, 블러, 흐림 처리되어 가려진 경우와 선명하게 노출된 경우를 반드시 구분해주세요.
+- 로고가 선명하게 보이면: logo_status = "exposed" (조치 필요)
+- 로고가 모자이크/블러 처리되어 가려져 있으면: logo_status = "blurred" (처리 완료)
+- 로고가 아예 없으면: logo_status = "none"
+
 반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
 {
   "logo_detected": true/false,
+  "logo_status": "exposed/blurred/none",
   "confidence": "high/medium/low",
   "detected_brands": ["브랜드명1", "브랜드명2"],
   "cap_detected": true/false,
@@ -540,6 +546,7 @@ def main():
                 continue
 
             logo_detected = analysis.get("logo_detected", False)
+            logo_status = analysis.get("logo_status", "none")
             confidence = analysis.get("confidence", "low")
             detected_brands = analysis.get("detected_brands", [])
             risk_level = analysis.get("risk_level", "none")
@@ -551,6 +558,7 @@ def main():
                 "article_url": link,
                 "image_url": img_url,
                 "logo_detected": logo_detected,
+                "logo_status": logo_status,
                 "confidence": confidence,
                 "detected_brands": detected_brands,
                 "risk_level": risk_level,
@@ -561,9 +569,9 @@ def main():
             }
             results.append(record)
 
-            if logo_detected and confidence in ("high", "medium"):
+            if logo_detected and logo_status == "exposed" and confidence in ("high", "medium"):
                 article_detected = True
-                log.warning(f"  🚨 로고 감지! 브랜드: {', '.join(detected_brands)} / 위험도: {risk_level}")
+                log.warning(f"  🚨 로고 노출! 브랜드: {', '.join(detected_brands)} / 위험도: {risk_level}")
                 log.warning(f"     모자: {analysis.get('cap_description', 'N/A')}")
                 log.warning(f"     권고: {analysis.get('recommendation', 'N/A')}")
 
@@ -572,6 +580,8 @@ def main():
                     "analysis": analysis,
                     "image_url": img_url,
                 })
+            elif logo_detected and logo_status == "blurred":
+                log.info(f"  ✅ 처리 완료 — 로고 모자이크/블러 처리됨: {', '.join(detected_brands)}")
             else:
                 log.info(f"  ✅ 안전 — {analysis.get('description', '')[:60]}")
 
@@ -606,6 +616,8 @@ def main():
 def generate_dashboard(results, history):
     now = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
     total = len(results)
+    exposed = [r for r in results if r.get("logo_detected") and r.get("logo_status") == "exposed"]
+    blurred = [r for r in results if r.get("logo_detected") and r.get("logo_status") == "blurred"]
     detected = [r for r in results if r.get("logo_detected")]
     safe = [r for r in results if not r.get("logo_detected") and not r.get("error")]
     articles_map = {}
@@ -623,9 +635,18 @@ def generate_dashboard(results, history):
     for r in detected:
         b = ", ".join(r.get("detected_brands", []))
         rk = r.get("risk_level", "unknown")
-        dc += '<div class="card detected"><div class="card-image">'
+        ls = r.get("logo_status", "none")
+        if ls == "blurred":
+            badge_bg = "#2196F3"
+            badge_text = "처리완료"
+            card_class = "card blurred"
+        else:
+            badge_bg = rl.get(rk, "#9E9E9E")
+            badge_text = rn.get(rk, "N/A")
+            card_class = "card detected"
+        dc += '<div class="' + card_class + '"><div class="card-image">'
         dc += '<img src="' + r.get("image_url","") + '" alt="" onerror="this.style.display=\'none\'">'
-        dc += '<span class="risk-badge" style="background:' + rl.get(rk,"#9E9E9E") + '">' + rn.get(rk,"N/A") + '</span>'
+        dc += '<span class="risk-badge" style="background:' + badge_bg + '">' + badge_text + '</span>'
         dc += '</div><div class="card-body">'
         dc += '<div class="brand-tag">' + b + '</div>'
         dc += '<h3><a href="' + r.get("article_url","#") + '" target="_blank">' + r.get("article_title","")[:60] + '</a></h3>'
@@ -637,8 +658,16 @@ def generate_dashboard(results, history):
     tr = ""
     for r in reversed(results[-100:]):
         d = r.get("logo_detected")
-        cls = "detected" if d else "safe"
-        st = "감지" if d else "안전"
+        ls = r.get("logo_status", "none")
+        if d and ls == "exposed":
+            cls = "detected"
+            st = "🚨 노출"
+        elif d and ls == "blurred":
+            cls = "blurred"
+            st = "✅ 처리완료"
+        else:
+            cls = "safe"
+            st = "✅ 안전"
         b = ", ".join(r.get("detected_brands",[])) if r.get("detected_brands") else "-"
         tr += '<tr class="' + cls + '">'
         tr += '<td>' + r.get("timestamp","")[:16] + '</td>'
@@ -686,6 +715,9 @@ body{background:#0a0a0f;color:#e8e6e3;font-family:'Noto Sans KR',-apple-system,s
 .card{border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);transition:transform 0.2s}
 .card:hover{transform:translateY(-2px)}
 .card.detected{border-color:rgba(244,67,54,0.25);background:rgba(244,67,54,0.04)}
+.card.blurred{border-color:rgba(33,150,243,0.25);background:rgba(33,150,243,0.04)}
+tr.blurred td{background:rgba(33,150,243,0.04)}
+tr.blurred .status-cell{color:#2196F3;font-weight:700}
 .card-image{position:relative;height:200px;overflow:hidden;background:#111}
 .card-image img{width:100%;height:100%;object-fit:cover}
 .risk-badge{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;color:white}
@@ -720,9 +752,9 @@ td a:hover{text-decoration:underline}
 </div></div></div>
 <div class="stats">
 <div class="stat-card"><div class="stat-number gray">""" + str(total) + """</div><div class="stat-label">총 분석 이미지</div></div>
-<div class="stat-card alert"><div class="stat-number red">""" + str(len(detected)) + """</div><div class="stat-label">로고 감지</div></div>
+<div class="stat-card alert"><div class="stat-number red">""" + str(len(exposed)) + """</div><div class="stat-label">🚨 로고 노출</div></div>
+<div class="stat-card"><div class="stat-number" style="color:#2196F3">""" + str(len(blurred)) + """</div><div class="stat-label">✅ 모자이크 처리</div></div>
 <div class="stat-card"><div class="stat-number green">""" + str(len(safe)) + """</div><div class="stat-label">안전</div></div>
-<div class="stat-card"><div class="stat-number gray">""" + str(len(articles_map)) + """</div><div class="stat-label">분석 기사 수</div></div>
 </div>
 <div class="section">
 <div class="section-title">로고 감지된 이미지 (""" + str(len(detected)) + """건)</div>
