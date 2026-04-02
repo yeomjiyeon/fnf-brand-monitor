@@ -572,16 +572,6 @@ def main():
                     "analysis": analysis,
                     "image_url": img_url,
                 })
-
-                # 즉시 알림 발송
-                send_slack_alert(
-                    {"title": title, "source": source, "link": link},
-                    analysis, img_url
-                )
-                send_email_alert(
-                    {"title": title, "source": source, "link": link},
-                    analysis, img_url
-                )
             else:
                 log.info(f"  ✅ 안전 — {analysis.get('description', '')[:60]}")
 
@@ -595,7 +585,10 @@ def main():
     save_history(history)
     save_results(results[-200:])  # 최근 200건 결과만 유지
 
-    # 5) 요약 로그
+    # 5) 대시보드 HTML 생성
+    generate_dashboard(results, history)
+
+    # 6) 요약 로그
     log.info("\n" + "=" * 60)
     log.info("모니터링 완료 요약")
     log.info(f"  분석 기사: {len(new_articles)}건")
@@ -606,6 +599,320 @@ def main():
             brands = ", ".join(det["analysis"].get("detected_brands", []))
             log.info(f"    🚨 [{brands}] {det['article']['title'][:40]}...")
     log.info("=" * 60)
+
+
+# ─── 대시보드 HTML 생성 ──────────────────────────────────
+def generate_dashboard(results: list, history: dict):
+    """분석 결과를 대시보드 HTML로 생성합니다."""
+    now = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+    
+    total = len(results)
+    detected = [r for r in results if r.get("logo_detected")]
+    safe = [r for r in results if not r.get("logo_detected") and not r.get("error")]
+    
+    # 기사별로 그룹핑 (같은 기사의 여러 이미지를 묶음)
+    articles_map = {}
+    for r in results:
+        url = r.get("article_url", "")
+        if url not in articles_map:
+            articles_map[url] = {
+                "title": r.get("article_title", ""),
+                "url": url,
+                "images": [],
+                "has_detection": False,
+            }
+        articles_map[url]["images"].append(r)
+        if r.get("logo_detected"):
+            articles_map[url]["has_detection"] = True
+    
+    # 감지된 기사 먼저, 최신순
+    sorted_articles = sorted(
+        articles_map.values(),
+        key=lambda a: (not a["has_detection"], ""),
+        reverse=False,
+    )
+
+    # 감지된 이미지 카드 HTML
+    detected_cards = ""
+    for r in detected:
+        brands = ", ".join(r.get("detected_brands", []))
+        risk = r.get("risk_level", "unknown")
+        risk_color = {"high": "#F44336", "medium": "#FF9800", "low": "#4CAF50"}.get(risk, "#9E9E9E")
+        detected_cards += f"""
+        <div class="card detected">
+            <div class="card-image">
+                <img src="{r.get('image_url', '')}" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:{risk_color}">{risk.upper()}</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 {brands}</div>
+                <h3><a href="{r.get('article_url', '#')}" target="_blank">{r.get('article_title', 'N/A')[:60]}</a></h3>
+                <p class="cap-desc">{r.get('cap_description', '')}</p>
+                <p class="recommendation">{r.get('recommendation', '')}</p>
+                <span class="timestamp">{r.get('timestamp', '')[:16]}</span>
+            </div>
+        </div>"""
+
+    # 전체 분석 결과 테이블
+    table_rows = ""
+    for r in reversed(results[-100:]):
+        status = "🚨 감지" if r.get("logo_detected") else "✅ 안전"
+        status_class = "detected" if r.get("logo_detected") else "safe"
+        brands = ", ".join(r.get("detected_brands", [])) if r.get("detected_brands") else "-"
+        desc = r.get("description", "")[:50]
+        table_rows += f"""
+        <tr class="{status_class}">
+            <td>{r.get('timestamp', '')[:16]}</td>
+            <td class="status-cell">{status}</td>
+            <td><a href="{r.get('article_url', '#')}" target="_blank">{r.get('article_title', 'N/A')[:40]}...</a></td>
+            <td>{brands}</td>
+            <td>{desc}</td>
+            <td><a href="{r.get('image_url', '#')}" target="_blank">보기</a></td>
+        </tr>"""
+
+    html = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F&F 브랜드 이미지 모니터링</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+* {{ box-sizing: border-box; margin: 0; padding: 0; }}
+body {{
+    background: #0a0a0f;
+    color: #e8e6e3;
+    font-family: 'Pretendard Variable', -apple-system, sans-serif;
+    min-height: 100vh;
+}}
+.header {{
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg, rgba(244,67,54,0.04) 0%, transparent 100%);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+}}
+.header-left {{ display: flex; align-items: center; gap: 14; }}
+.logo {{
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #F44336, #C62828);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}}
+.header h1 {{ font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }}
+.header p {{ font-size: 12px; color: #666; margin-top: 2px; }}
+.update-info {{
+    font-size: 12px; color: #555;
+    padding: 8px 16px; border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+}}
+.update-info strong {{ color: #888; }}
+
+/* Stats */
+.stats {{
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; padding: 20px 32px;
+}}
+.stat-card {{
+    padding: 20px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+}}
+.stat-card.alert {{
+    background: rgba(244,67,54,0.06);
+    border-color: rgba(244,67,54,0.2);
+}}
+.stat-number {{ font-size: 32px; font-weight: 800; }}
+.stat-number.red {{ color: #F44336; }}
+.stat-number.green {{ color: #66BB6A; }}
+.stat-number.gray {{ color: #888; }}
+.stat-label {{ font-size: 13px; color: #777; margin-top: 4px; }}
+
+/* Section */
+.section {{
+    padding: 20px 32px;
+}}
+.section-title {{
+    font-size: 16px; font-weight: 700; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+}}
+
+/* Detected Cards */
+.detected-grid {{
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}}
+.card {{
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    transition: transform 0.2s;
+}}
+.card:hover {{ transform: translateY(-2px); }}
+.card.detected {{
+    border-color: rgba(244,67,54,0.25);
+    background: rgba(244,67,54,0.04);
+}}
+.card-image {{
+    position: relative; height: 200px; overflow: hidden;
+    background: #111;
+}}
+.card-image img {{
+    width: 100%; height: 100%; object-fit: cover;
+}}
+.risk-badge {{
+    position: absolute; top: 10px; right: 10px;
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; color: white;
+}}
+.card-body {{ padding: 16px; }}
+.brand-tag {{
+    font-size: 13px; font-weight: 700; color: #F44336;
+    margin-bottom: 8px;
+}}
+.card-body h3 {{ font-size: 14px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; }}
+.card-body h3 a {{ color: #e8e6e3; text-decoration: none; }}
+.card-body h3 a:hover {{ color: #fff; text-decoration: underline; }}
+.cap-desc {{
+    font-size: 12px; color: #ef9a9a; line-height: 1.5; margin-bottom: 6px;
+}}
+.recommendation {{
+    font-size: 12px; color: #ffcc80; line-height: 1.5;
+    padding: 8px 12px; border-radius: 6px;
+    background: rgba(255,152,0,0.08);
+    border: 1px solid rgba(255,152,0,0.15);
+    margin-bottom: 8px;
+}}
+.timestamp {{ font-size: 11px; color: #555; }}
+
+/* Table */
+.table-wrap {{
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}}
+table {{
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+}}
+th {{
+    padding: 12px 14px;
+    text-align: left;
+    background: rgba(255,255,255,0.03);
+    color: #888; font-weight: 600; font-size: 11px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}}
+td {{
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: #bbb;
+}}
+tr.detected td {{ background: rgba(244,67,54,0.04); }}
+tr.detected .status-cell {{ color: #F44336; font-weight: 700; }}
+tr.safe .status-cell {{ color: #66BB6A; }}
+td a {{ color: #90CAF9; text-decoration: none; }}
+td a:hover {{ text-decoration: underline; }}
+
+.empty-state {{
+    text-align: center; padding: 60px;
+    color: #444;
+}}
+.empty-state .icon {{ font-size: 48px; margin-bottom: 12px; }}
+
+.footer {{
+    padding: 20px 32px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 11px; color: #333;
+    display: flex; justify-content: space-between;
+}}
+
+@media (max-width: 768px) {{
+    .header {{ padding: 16px; }}
+    .stats {{ padding: 16px; grid-template-columns: repeat(2, 1fr); }}
+    .section {{ padding: 16px; }}
+    .detected-grid {{ grid-template-columns: 1fr; }}
+    .stat-number {{ font-size: 24px; }}
+}}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="logo">🛡</div>
+        <div>
+            <h1>F&F 브랜드 이미지 모니터링</h1>
+            <p>키워드: {', '.join(SEARCH_KEYWORDS)} · 네이버 뉴스 · Claude Vision AI</p>
+        </div>
+    </div>
+    <div class="update-info">
+        <strong>마지막 업데이트:</strong> {now}<br>
+        <strong>자동 갱신:</strong> 5분마다
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat-card">
+        <div class="stat-number gray">{total}</div>
+        <div class="stat-label">총 분석 이미지</div>
+    </div>
+    <div class="stat-card alert">
+        <div class="stat-number red">{len(detected)}</div>
+        <div class="stat-label">🚨 로고 감지</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number green">{len(safe)}</div>
+        <div class="stat-label">✅ 안전</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number gray">{len(articles_map)}</div>
+        <div class="stat-label">분석 기사 수</div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">🚨 로고 감지된 이미지 ({len(detected)}건)</div>
+    {"<div class='detected-grid'>" + detected_cards + "</div>" if detected_cards else "<div class='empty-state'><div class='icon'>✅</div><p>감지된 로고가 없습니다</p></div>"}
+</div>
+
+<div class="section">
+    <div class="section-title">📋 전체 분석 내역 (최근 100건)</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>시각</th>
+                    <th>상태</th>
+                    <th>기사</th>
+                    <th>감지 브랜드</th>
+                    <th>설명</th>
+                    <th>이미지</th>
+                </tr>
+            </thead>
+            <tbody>
+                {table_rows if table_rows else "<tr><td colspan='6' style='text-align:center;padding:40px;color:#444'>분석 결과가 없습니다</td></tr>"}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="footer">
+    <span>F&F Communications Team · Brand Safety Monitor</span>
+    <span>Powered by Claude Vision API · 자동 갱신 5분</span>
+</div>
+
+</body>
+</html>"""
+
+    # docs 폴더에 저장 (GitHub Pages용)
+    Path("docs").mkdir(exist_ok=True)
+    with open("docs/index.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    log.info(f"📊 대시보드 생성 완료: docs/index.html (감지 {len(detected)}건 / 전체 {total}건)")
 
 
 if __name__ == "__main__":
