@@ -1,13 +1,8 @@
 name: F&F Brand Image Monitor
 
 on:
-  # 1분 간격 실행 (GitHub Actions 최소 단위는 5분이지만, 
-  # 실제로는 cron이 5분 간격으로 트리거됨)
-  # ※ 긴급 모니터링 기간에는 수동 트리거 권장
   schedule:
-    - cron: '*/5 * * * *'   # 5분마다 (GitHub 최소 단위)
-  
-  # 수동 실행 가능
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       keyword:
@@ -15,14 +10,13 @@ on:
         required: false
         default: '박왕열'
 
-env:
-  SEARCH_KEYWORD: ${{ github.event.inputs.keyword || '박왕열' }}
+permissions:
+  contents: write
+  pages: write
 
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    
-    # 동시 실행 방지
     concurrency:
       group: brand-monitor
       cancel-in-progress: true
@@ -52,22 +46,24 @@ jobs:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          GMAIL_RECIPIENT: ${{ secrets.GMAIL_RECIPIENT }}
         run: python monitor.py
 
-      # 감지 결과를 GitHub Actions Summary에 표시
+      # 대시보드를 GitHub Pages로 자동 배포
+      - name: Deploy Dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/ detection_results.json monitoring_history.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "📊 대시보드 업데이트 $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M KST')"
+          git push || true
+
       - name: Generate Summary
         if: always()
         run: |
           echo "## 🛡 F&F Brand Monitor Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**실행 시각:** $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S KST')" >> $GITHUB_STEP_SUMMARY
-          echo "**키워드:** $SEARCH_KEYWORD" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
           if [ -f detection_results.json ]; then
             TOTAL=$(python3 -c "import json; d=json.load(open('detection_results.json')); print(len(d))")
             DETECTED=$(python3 -c "import json; d=json.load(open('detection_results.json')); print(sum(1 for x in d if x.get('logo_detected')))")
@@ -75,4 +71,6 @@ jobs:
             echo "|------|------|" >> $GITHUB_STEP_SUMMARY
             echo "| 총 분석 이미지 | $TOTAL |" >> $GITHUB_STEP_SUMMARY
             echo "| 로고 감지 | $DETECTED |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 [대시보드 보기](https://yeomjiyeon.github.io/fnf-brand-monitor/)" >> $GITHUB_STEP_SUMMARY
           fi
