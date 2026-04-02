@@ -603,14 +603,15 @@ def main():
 
 # ─── 대시보드 HTML 생성 ──────────────────────────────────
 def generate_dashboard(results: list, history: dict):
-    """분석 결과를 대시보드 HTML로 생성합니다."""
-    now = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+    """분석 결과를 회장님 보고용 프리미엄 대시보드 HTML로 생성합니다."""
+    now = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
+    today = datetime.now(KST).strftime("%Y.%m.%d")
     
     total = len(results)
     detected = [r for r in results if r.get("logo_detected")]
     safe = [r for r in results if not r.get("logo_detected") and not r.get("error")]
     
-    # 기사별로 그룹핑 (같은 기사의 여러 이미지를 묶음)
+    # 기사별로 그룹핑
     articles_map = {}
     for r in results:
         url = r.get("article_url", "")
@@ -624,291 +625,391 @@ def generate_dashboard(results: list, history: dict):
         articles_map[url]["images"].append(r)
         if r.get("logo_detected"):
             articles_map[url]["has_detection"] = True
-    
-    # 감지된 기사 먼저, 최신순
-    sorted_articles = sorted(
-        articles_map.values(),
-        key=lambda a: (not a["has_detection"], ""),
-        reverse=False,
-    )
 
     # 감지된 이미지 카드 HTML
     detected_cards = ""
-    for r in detected:
+    for idx, r in enumerate(detected):
         brands = ", ".join(r.get("detected_brands", []))
         risk = r.get("risk_level", "unknown")
-        risk_color = {"high": "#F44336", "medium": "#FF9800", "low": "#4CAF50"}.get(risk, "#9E9E9E")
-        detected_cards += f"""
-        <div class="card detected">
-            <div class="card-image">
-                <img src="{r.get('image_url', '')}" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
-                <span class="risk-badge" style="background:{risk_color}">{risk.upper()}</span>
+        risk_label = {{"high": "위험", "medium": "주의", "low": "낮음"}}.get(risk, "미정")
+        risk_color = {{"high": "#E53935", "medium": "#FB8C00", "low": "#43A047"}}.get(risk, "#78909C")
+        risk_bg = {{"high": "rgba(229,57,53,0.08)", "medium": "rgba(251,140,0,0.08)", "low": "rgba(67,160,71,0.08)"}}.get(risk, "rgba(120,144,156,0.08)")
+        ts = r.get('timestamp', '')[:10]
+        detected_cards += f'''
+        <div class="alert-card" style="animation-delay: {{idx * 0.08}}s">
+            <div class="alert-image-wrap">
+                <img src="{{r.get('image_url', '')}}" alt="" onerror="this.parentElement.innerHTML='<div class=\\'img-fallback\\'>이미지 로드 불가</div>'" />
+                <div class="alert-risk" style="background: {{risk_color}}">{{risk_label}}</div>
             </div>
-            <div class="card-body">
-                <div class="brand-tag">🚨 {brands}</div>
-                <h3><a href="{r.get('article_url', '#')}" target="_blank">{r.get('article_title', 'N/A')[:60]}</a></h3>
-                <p class="cap-desc">{r.get('cap_description', '')}</p>
-                <p class="recommendation">{r.get('recommendation', '')}</p>
-                <span class="timestamp">{r.get('timestamp', '')[:16]}</span>
+            <div class="alert-content">
+                <div class="alert-brands" style="color: {{risk_color}}">{{brands}}</div>
+                <a class="alert-title" href="{{r.get('article_url', '#')}}" target="_blank">{{r.get('article_title', '제목 없음')[:55]}}</a>
+                <p class="alert-cap">{{r.get('cap_description', '')}}</p>
+                <div class="alert-action" style="background: {{risk_bg}}; border-color: {{risk_color}}20">
+                    <strong>조치 권고</strong> {{r.get('recommendation', '')}}
+                </div>
+                <div class="alert-meta">{{ts}}</div>
             </div>
-        </div>"""
+        </div>'''
 
-    # 전체 분석 결과 테이블
+    # 전체 분석 테이블
     table_rows = ""
     for r in reversed(results[-100:]):
-        status = "🚨 감지" if r.get("logo_detected") else "✅ 안전"
-        status_class = "detected" if r.get("logo_detected") else "safe"
-        brands = ", ".join(r.get("detected_brands", [])) if r.get("detected_brands") else "-"
-        desc = r.get("description", "")[:50]
-        table_rows += f"""
-        <tr class="{status_class}">
-            <td>{r.get('timestamp', '')[:16]}</td>
-            <td class="status-cell">{status}</td>
-            <td><a href="{r.get('article_url', '#')}" target="_blank">{r.get('article_title', 'N/A')[:40]}...</a></td>
-            <td>{brands}</td>
-            <td>{desc}</td>
-            <td><a href="{r.get('image_url', '#')}" target="_blank">보기</a></td>
-        </tr>"""
+        is_det = r.get("logo_detected")
+        status_html = '<span class="badge badge-danger">감지</span>' if is_det else '<span class="badge badge-safe">안전</span>'
+        brands = ", ".join(r.get("detected_brands", [])) if r.get("detected_brands") else "—"
+        desc = r.get("description", "")[:45]
+        table_rows += f'''
+        <tr class="{{"row-danger" if is_det else ""}}">
+            <td class="td-time">{{r.get('timestamp', '')[:16]}}</td>
+            <td>{{status_html}}</td>
+            <td class="td-title"><a href="{{r.get('article_url', '#')}}" target="_blank">{{r.get('article_title', '')[:38]}}…</a></td>
+            <td class="td-brand">{{brands}}</td>
+            <td class="td-desc">{{desc}}</td>
+            <td class="td-img"><a href="{{r.get('image_url', '#')}}" target="_blank">보기</a></td>
+        </tr>'''
 
-    html = f"""<!DOCTYPE html>
+    html = f'''<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>F&F 브랜드 이미지 모니터링</title>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<title>F&amp;F Brand Safety Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
-* {{ box-sizing: border-box; margin: 0; padding: 0; }}
+@charset "utf-8";
+*, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+:root {{
+  --bg: #05060a;
+  --surface: #0c0d14;
+  --surface2: #12131c;
+  --border: rgba(255,255,255,0.05);
+  --text: #c8c6c2;
+  --text2: #7a7872;
+  --accent: #c9a96e;
+  --accent2: #b8944f;
+  --danger: #d44040;
+  --danger-soft: rgba(212,64,64,0.07);
+  --safe: #3d9;
+}}
+html {{ scroll-behavior: smooth; }}
 body {{
-    background: #0a0a0f;
-    color: #e8e6e3;
-    font-family: 'Pretendard Variable', -apple-system, sans-serif;
-    min-height: 100vh;
-}}
-.header {{
-    padding: 24px 32px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    background: linear-gradient(180deg, rgba(244,67,54,0.04) 0%, transparent 100%);
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 16px;
-}}
-.header-left {{ display: flex; align-items: center; gap: 14; }}
-.logo {{
-    width: 40px; height: 40px; border-radius: 10px;
-    background: linear-gradient(135deg, #F44336, #C62828);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-}}
-.header h1 {{ font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }}
-.header p {{ font-size: 12px; color: #666; margin-top: 2px; }}
-.update-info {{
-    font-size: 12px; color: #555;
-    padding: 8px 16px; border-radius: 8px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-}}
-.update-info strong {{ color: #888; }}
-
-/* Stats */
-.stats {{
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px; padding: 20px 32px;
-}}
-.stat-card {{
-    padding: 20px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
-}}
-.stat-card.alert {{
-    background: rgba(244,67,54,0.06);
-    border-color: rgba(244,67,54,0.2);
-}}
-.stat-number {{ font-size: 32px; font-weight: 800; }}
-.stat-number.red {{ color: #F44336; }}
-.stat-number.green {{ color: #66BB6A; }}
-.stat-number.gray {{ color: #888; }}
-.stat-label {{ font-size: 13px; color: #777; margin-top: 4px; }}
-
-/* Section */
-.section {{
-    padding: 20px 32px;
-}}
-.section-title {{
-    font-size: 16px; font-weight: 700; margin-bottom: 16px;
-    display: flex; align-items: center; gap: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
 }}
 
-/* Detected Cards */
-.detected-grid {{
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
+/* ── HEADER ── */
+.masthead {{
+  position: relative;
+  padding: 48px 56px 40px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }}
-.card {{
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.02);
-    transition: transform 0.2s;
+.masthead::before {{
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 0% 0%, rgba(201,169,110,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 100% 100%, rgba(212,64,64,0.04) 0%, transparent 60%);
+  pointer-events: none;
 }}
-.card:hover {{ transform: translateY(-2px); }}
-.card.detected {{
-    border-color: rgba(244,67,54,0.25);
-    background: rgba(244,67,54,0.04);
+.masthead-inner {{ position: relative; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px; }}
+.brand {{ display: flex; align-items: center; gap: 18px; }}
+.brand-mark {{
+  width: 48px; height: 48px;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  display: grid; place-items: center;
+  font-size: 22px;
+  background: linear-gradient(135deg, rgba(201,169,110,0.12), transparent);
 }}
-.card-image {{
-    position: relative; height: 200px; overflow: hidden;
-    background: #111;
+.brand h1 {{
+  font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+  color: #f0ede8;
 }}
-.card-image img {{
-    width: 100%; height: 100%; object-fit: cover;
+.brand .sub {{
+  font-size: 12px; font-weight: 400; color: var(--text2);
+  margin-top: 3px; letter-spacing: 0.3px;
 }}
-.risk-badge {{
-    position: absolute; top: 10px; right: 10px;
-    padding: 4px 10px; border-radius: 6px;
-    font-size: 11px; font-weight: 700; color: white;
+.meta-pill {{
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 7px 14px; border-radius: 8px;
 }}
-.card-body {{ padding: 16px; }}
-.brand-tag {{
-    font-size: 13px; font-weight: 700; color: #F44336;
-    margin-bottom: 8px;
+.meta-pill .dot {{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--safe);
+  animation: blink 2.4s infinite;
 }}
-.card-body h3 {{ font-size: 14px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; }}
-.card-body h3 a {{ color: #e8e6e3; text-decoration: none; }}
-.card-body h3 a:hover {{ color: #fff; text-decoration: underline; }}
-.cap-desc {{
-    font-size: 12px; color: #ef9a9a; line-height: 1.5; margin-bottom: 6px;
-}}
-.recommendation {{
-    font-size: 12px; color: #ffcc80; line-height: 1.5;
-    padding: 8px 12px; border-radius: 6px;
-    background: rgba(255,152,0,0.08);
-    border: 1px solid rgba(255,152,0,0.15);
-    margin-bottom: 8px;
-}}
-.timestamp {{ font-size: 11px; color: #555; }}
+@keyframes blink {{ 0%,100% {{ opacity: 1; }} 50% {{ opacity: .25; }} }}
 
-/* Table */
+/* ── KPI STRIP ── */
+.kpi-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}}
+.kpi {{
+  background: var(--bg);
+  padding: 28px 32px;
+  text-align: center;
+}}
+.kpi.highlight {{ background: var(--danger-soft); }}
+.kpi-value {{
+  font-size: 38px; font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1;
+}}
+.kpi-value.gold {{ color: var(--accent); }}
+.kpi-value.red {{ color: var(--danger); }}
+.kpi-value.green {{ color: var(--safe); }}
+.kpi-value.muted {{ color: var(--text2); }}
+.kpi-label {{
+  font-size: 11px; font-weight: 500;
+  color: var(--text2);
+  margin-top: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}}
+
+/* ── SECTION ── */
+.section {{ padding: 36px 56px; }}
+.section + .section {{ border-top: 1px solid var(--border); }}
+.section-head {{
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+}}
+.section-head h2 {{
+  font-size: 15px; font-weight: 700; color: #e8e5e0;
+  letter-spacing: -0.2px;
+}}
+.section-head .count {{
+  font-size: 11px; font-weight: 600;
+  color: var(--danger);
+  background: var(--danger-soft);
+  padding: 3px 10px; border-radius: 20px;
+}}
+
+/* ── ALERT CARDS ── */
+.alert-grid {{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+}}
+.alert-card {{
+  display: flex;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid rgba(212,64,64,0.12);
+  transition: transform 0.25s, box-shadow 0.25s;
+  animation: cardIn 0.5s ease both;
+}}
+@keyframes cardIn {{ from {{ opacity: 0; transform: translateY(12px); }} }}
+.alert-card:hover {{
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}}
+.alert-image-wrap {{
+  position: relative;
+  width: 160px; min-height: 200px;
+  flex-shrink: 0;
+  background: #111;
+  overflow: hidden;
+}}
+.alert-image-wrap img {{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}}
+.img-fallback {{
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  font-size: 11px; color: #555;
+  background: var(--surface2);
+}}
+.alert-risk {{
+  position: absolute; top: 10px; left: 10px;
+  padding: 3px 10px; border-radius: 5px;
+  font-size: 10px; font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}}
+.alert-content {{
+  flex: 1;
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+}}
+.alert-brands {{
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}}
+.alert-title {{
+  font-size: 14px; font-weight: 600;
+  color: #e0ddd8;
+  text-decoration: none;
+  line-height: 1.5;
+}}
+.alert-title:hover {{ color: #fff; }}
+.alert-cap {{
+  font-size: 12px; color: #b0746e;
+  line-height: 1.55;
+}}
+.alert-action {{
+  font-size: 11px; line-height: 1.6;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-top: auto;
+}}
+.alert-action strong {{
+  display: block;
+  font-size: 10px; font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 2px;
+}}
+.alert-meta {{ font-size: 10px; color: var(--text2); margin-top: 4px; }}
+
+/* ── TABLE ── */
 .table-wrap {{
-    overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }}
-table {{
-    width: 100%; border-collapse: collapse;
-    font-size: 13px;
-}}
+table {{ width: 100%; border-collapse: collapse; font-size: 12px; }}
 th {{
-    padding: 12px 14px;
-    text-align: left;
-    background: rgba(255,255,255,0.03);
-    color: #888; font-weight: 600; font-size: 11px;
-    letter-spacing: 0.5px; text-transform: uppercase;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 10px; font-weight: 600;
+  color: var(--text2);
+  background: var(--surface2);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
 }}
 td {{
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-    color: #bbb;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
 }}
-tr.detected td {{ background: rgba(244,67,54,0.04); }}
-tr.detected .status-cell {{ color: #F44336; font-weight: 700; }}
-tr.safe .status-cell {{ color: #66BB6A; }}
-td a {{ color: #90CAF9; text-decoration: none; }}
-td a:hover {{ text-decoration: underline; }}
-
-.empty-state {{
-    text-align: center; padding: 60px;
-    color: #444;
+.row-danger td {{ background: var(--danger-soft); }}
+.badge {{
+  display: inline-block;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.3px;
 }}
-.empty-state .icon {{ font-size: 48px; margin-bottom: 12px; }}
+.badge-danger {{ background: var(--danger); color: #fff; }}
+.badge-safe {{ background: rgba(51,221,153,0.1); color: var(--safe); }}
+.td-time {{ color: var(--text2); white-space: nowrap; }}
+.td-title a {{ color: #a0b4d0; text-decoration: none; }}
+.td-title a:hover {{ text-decoration: underline; }}
+.td-brand {{ color: var(--text2); }}
+.td-desc {{ color: var(--text2); font-size: 11px; }}
+.td-img a {{ color: var(--accent2); text-decoration: none; font-weight: 500; }}
 
-.footer {{
-    padding: 20px 32px;
-    border-top: 1px solid rgba(255,255,255,0.04);
-    font-size: 11px; color: #333;
-    display: flex; justify-content: space-between;
+/* ── EMPTY ── */
+.empty {{ text-align: center; padding: 64px; color: #333; }}
+.empty .ico {{ font-size: 44px; margin-bottom: 12px; opacity: 0.4; }}
+
+/* ── FOOTER ── */
+.foot {{
+  padding: 24px 56px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: #2a2a2a;
+  letter-spacing: 0.3px;
 }}
 
-@media (max-width: 768px) {{
-    .header {{ padding: 16px; }}
-    .stats {{ padding: 16px; grid-template-columns: repeat(2, 1fr); }}
-    .section {{ padding: 16px; }}
-    .detected-grid {{ grid-template-columns: 1fr; }}
-    .stat-number {{ font-size: 24px; }}
+@media (max-width: 900px) {{
+  .masthead, .section, .foot {{ padding-left: 24px; padding-right: 24px; }}
+  .kpi-strip {{ grid-template-columns: repeat(2, 1fr); }}
+  .alert-grid {{ grid-template-columns: 1fr; }}
+  .alert-image-wrap {{ width: 120px; min-height: 160px; }}
+  .kpi-value {{ font-size: 28px; }}
 }}
 </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="header-left">
-        <div class="logo">🛡</div>
-        <div>
-            <h1>F&F 브랜드 이미지 모니터링</h1>
-            <p>키워드: {', '.join(SEARCH_KEYWORDS)} · 네이버 뉴스 · Claude Vision AI</p>
-        </div>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <div class="brand-mark">F</div>
+      <div>
+        <h1>Brand Safety Monitor</h1>
+        <div class="sub">F&amp;F Communications · 뉴스 이미지 브랜드 로고 자동 감지 시스템</div>
+      </div>
     </div>
-    <div class="update-info">
-        <strong>마지막 업데이트:</strong> {now}<br>
-        <strong>자동 갱신:</strong> 5분마다
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <div class="meta-pill"><span class="dot"></span> 실시간 모니터링 · 5분 주기</div>
+      <div class="meta-pill">업데이트 {now}</div>
     </div>
-</div>
+  </div>
+</header>
 
-<div class="stats">
-    <div class="stat-card">
-        <div class="stat-number gray">{total}</div>
-        <div class="stat-label">총 분석 이미지</div>
-    </div>
-    <div class="stat-card alert">
-        <div class="stat-number red">{len(detected)}</div>
-        <div class="stat-label">🚨 로고 감지</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number green">{len(safe)}</div>
-        <div class="stat-label">✅ 안전</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number gray">{len(articles_map)}</div>
-        <div class="stat-label">분석 기사 수</div>
-    </div>
-</div>
-
-<div class="section">
-    <div class="section-title">🚨 로고 감지된 이미지 ({len(detected)}건)</div>
-    {"<div class='detected-grid'>" + detected_cards + "</div>" if detected_cards else "<div class='empty-state'><div class='icon'>✅</div><p>감지된 로고가 없습니다</p></div>"}
+<div class="kpi-strip">
+  <div class="kpi">
+    <div class="kpi-value gold">{len(articles_map)}</div>
+    <div class="kpi-label">분석 기사</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-value muted">{total}</div>
+    <div class="kpi-label">분석 이미지</div>
+  </div>
+  <div class="kpi highlight">
+    <div class="kpi-value red">{len(detected)}</div>
+    <div class="kpi-label">로고 감지</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-value green">{len(safe)}</div>
+    <div class="kpi-label">안전 확인</div>
+  </div>
 </div>
 
 <div class="section">
-    <div class="section-title">📋 전체 분석 내역 (최근 100건)</div>
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>시각</th>
-                    <th>상태</th>
-                    <th>기사</th>
-                    <th>감지 브랜드</th>
-                    <th>설명</th>
-                    <th>이미지</th>
-                </tr>
-            </thead>
-            <tbody>
-                {table_rows if table_rows else "<tr><td colspan='6' style='text-align:center;padding:40px;color:#444'>분석 결과가 없습니다</td></tr>"}
-            </tbody>
-        </table>
-    </div>
+  <div class="section-head">
+    <h2>로고 감지 이미지</h2>
+    <span class="count">{len(detected)}건</span>
+  </div>
+  {"<div class='alert-grid'>" + detected_cards + "</div>" if detected_cards else "<div class='empty'><div class='ico'>✓</div><p>감지된 브랜드 로고가 없습니다</p></div>"}
 </div>
 
-<div class="footer">
-    <span>F&F Communications Team · Brand Safety Monitor</span>
-    <span>Powered by Claude Vision API · 자동 갱신 5분</span>
+<div class="section">
+  <div class="section-head">
+    <h2>전체 분석 내역</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>시각</th><th>상태</th><th>기사</th><th>브랜드</th><th>설명</th><th>이미지</th>
+      </tr></thead>
+      <tbody>
+        {table_rows if table_rows else "<tr><td colspan='6' style='text-align:center;padding:48px;color:#333'>분석 결과 없음</td></tr>"}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<footer class="foot">
+  <span>F&amp;F Communications Team — Brand Safety Monitoring System</span>
+  <span>Powered by Claude Vision API · {today}</span>
+</footer>
 
 </body>
-</html>"""
+</html>'''
 
-    # docs 폴더에 저장 (GitHub Pages용)
     Path("docs").mkdir(exist_ok=True)
     with open("docs/index.html", "w", encoding="utf-8") as f:
         f.write(html)
