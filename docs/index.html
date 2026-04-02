@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F&F 브랜드 이미지 모니터링</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #0a0a0f;
+    color: #e8e6e3;
+    font-family: 'Pretendard Variable', -apple-system, sans-serif;
+    min-height: 100vh;
+}
+.header {
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg, rgba(244,67,54,0.04) 0%, transparent 100%);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+}
+.header-left { display: flex; align-items: center; gap: 14; }
+.logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #F44336, #C62828);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+.header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.header p { font-size: 12px; color: #666; margin-top: 2px; }
+.update-info {
+    font-size: 12px; color: #555;
+    padding: 8px 16px; border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.update-info strong { color: #888; }
+
+/* Stats */
+.stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; padding: 20px 32px;
+}
+.stat-card {
+    padding: 20px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.stat-card.alert {
+    background: rgba(244,67,54,0.06);
+    border-color: rgba(244,67,54,0.2);
+}
+.stat-number { font-size: 32px; font-weight: 800; }
+.stat-number.red { color: #F44336; }
+.stat-number.green { color: #66BB6A; }
+.stat-number.gray { color: #888; }
+.stat-label { font-size: 13px; color: #777; margin-top: 4px; }
+
+/* Section */
+.section {
+    padding: 20px 32px;
+}
+.section-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* Detected Cards */
+.detected-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-2px); }
+.card.detected {
+    border-color: rgba(244,67,54,0.25);
+    background: rgba(244,67,54,0.04);
+}
+.card-image {
+    position: relative; height: 200px; overflow: hidden;
+    background: #111;
+}
+.card-image img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.risk-badge {
+    position: absolute; top: 10px; right: 10px;
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; color: white;
+}
+.card-body { padding: 16px; }
+.brand-tag {
+    font-size: 13px; font-weight: 700; color: #F44336;
+    margin-bottom: 8px;
+}
+.card-body h3 { font-size: 14px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; }
+.card-body h3 a { color: #e8e6e3; text-decoration: none; }
+.card-body h3 a:hover { color: #fff; text-decoration: underline; }
+.cap-desc {
+    font-size: 12px; color: #ef9a9a; line-height: 1.5; margin-bottom: 6px;
+}
+.recommendation {
+    font-size: 12px; color: #ffcc80; line-height: 1.5;
+    padding: 8px 12px; border-radius: 6px;
+    background: rgba(255,152,0,0.08);
+    border: 1px solid rgba(255,152,0,0.15);
+    margin-bottom: 8px;
+}
+.timestamp { font-size: 11px; color: #555; }
+
+/* Table */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+}
+th {
+    padding: 12px 14px;
+    text-align: left;
+    background: rgba(255,255,255,0.03);
+    color: #888; font-weight: 600; font-size: 11px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: #bbb;
+}
+tr.detected td { background: rgba(244,67,54,0.04); }
+tr.detected .status-cell { color: #F44336; font-weight: 700; }
+tr.safe .status-cell { color: #66BB6A; }
+td a { color: #90CAF9; text-decoration: none; }
+td a:hover { text-decoration: underline; }
+
+.empty-state {
+    text-align: center; padding: 60px;
+    color: #444;
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+.footer {
+    padding: 20px 32px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 11px; color: #333;
+    display: flex; justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .header { padding: 16px; }
+    .stats { padding: 16px; grid-template-columns: repeat(2, 1fr); }
+    .section { padding: 16px; }
+    .detected-grid { grid-template-columns: 1fr; }
+    .stat-number { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="logo">🛡</div>
+        <div>
+            <h1>F&F 브랜드 이미지 모니터링</h1>
+            <p>키워드: 박왕열, 마약왕, 마약왕 박왕열 · 네이버 뉴스 · Claude Vision AI</p>
+        </div>
+    </div>
+    <div class="update-info">
+        <strong>마지막 업데이트:</strong> 2026-04-02 19:42:47 KST<br>
+        <strong>자동 갱신:</strong> 5분마다
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat-card">
+        <div class="stat-number gray">164</div>
+        <div class="stat-label">총 분석 이미지</div>
+    </div>
+    <div class="stat-card alert">
+        <div class="stat-number red">45</div>
+        <div class="stat-label">🚨 로고 감지</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number green">119</div>
+        <div class="stat-label">✅ 안전</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number gray">38</div>
+        <div class="stat-label">분석 기사 수</div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">🚨 로고 감지된 이미지 (45건)</div>
+    <div class='detected-grid'>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/057/2026/04/02/20260402181840_20_536_1415499_1080_7_20260402182209698.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/057/0001942840?sid=102" target="_blank">박왕열 &quot;부끄러운 아버지 안 되려…&quot; 그래서 마약 유통에 살인까지? [뉴...</a></h3>
+                <p class="cap-desc">한 남성이 검은색 모자를 착용하고 있으며, 해당 모자에 흰색 'NY' 로고가 명확히 보입니다</p>
+                <p class="recommendation">MLB/뉴욕 양키스 로고가 명확히 노출되어 있으므로, 해당 부분에 블러 처리나 모자 로고 부분을 가리는 처리가 필요합니다</p>
+                <span class="timestamp">2026-04-02T19:15</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/001/2026/04/02/PYH2026032704690006000_P4_20260402181115437.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/001/0015999626?sid=102" target="_blank">경찰, 중동 가짜뉴스 실시간 모니터링…524건 삭제·차단 요청(종합)</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 상징적인 흰색 'NY' 로고가 명확히 보임</p>
+                <p class="recommendation">뉴욕 양키스는 MLB의 대표적인 팀 브랜드로, 상업적 사용 시 라이선스 문제가 있을 수 있으니 사용 목적과 맥락을 고려하여 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:15</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/001/2026/04/02/PYH2026032704690006000_P4_20260402181115437.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/001/0015999626?sid=102" target="_blank">경찰, 중동 가짜뉴스 실시간 모니터링…524건 삭제·차단 요청(종합)</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 명확히 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">MLB 뉴욕 양키스 공식 로고가 명확히 노출되어 있어 상표권 침해 위험이 높음. 모자 부분 블러 처리 또는 로고 제거 필요</p>
+                <span class="timestamp">2026-04-02T19:15</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://cdn.obsnews.co.kr/news/thumbnail/202604/1519571_718527_320_v150.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://www.obsnews.co.kr/news/articleView.html?idxno=1519571" target="_blank">'텔레그램 마약왕' 박왕열, 내일 검찰 송치</a></h3>
+                <p class="cap-desc">중앙 인물이 검은색 야구 모자를 착용하고 있으며, 모자 전면에 뉴욕 양키스의 'NY' 로고가 명확히 보임</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 식별되므로 브랜드 노출 관련 검토 필요. 필요시 모자 부분 블러 처리 고려</p>
+                <span class="timestamp">2026-04-02T19:16</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://images.khan.co.kr/article/2026/04/02/news-p.v1.20260402.a7a5f61f65ac43129990e12e59045cef_P1.png" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://sports.khan.co.kr/article/202604021758003?pt=nv" target="_blank">버닝썬 재수사 가능성·조갑경 ‘라스’·황석희 SNS 변화…오늘 연예계...</a></h3>
+                <p class="cap-desc">왼쪽 상단 인물이 착용한 검은색 모자에 뉴욕 양키스의 'NY' 로고가 명확하게 보임</p>
+                <p class="recommendation">MLB/뉴욕 양키스 로고가 명확하게 보이므로 브랜드 노출 검토 필요. 필요시 로고 블러 처리 또는 이미지 교체 고려</p>
+                <span class="timestamp">2026-04-02T19:16</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://images.khan.co.kr/article/2026/04/02/news-p.v1.20260402.f095ebfcf20b475e8fde6191df75611d_P1.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://sports.khan.co.kr/article/202604021739003?pt=nv" target="_blank">박왕열·황하나·버닝썬 “권력형 카르텔, 연쇄 의문사는 입막음”</a></h3>
+                <p class="cap-desc">왼쪽 인물이 뉴욕 양키스의 NY 로고가 명확히 보이는 검은색 야구모자를 착용하고 있음</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 노출된 모자가 착용되어 있으므로, 해당 부분을 블러 처리하거나 모자 부분을 크롭하여 제거할 것을 권장합니다.</p>
+                <span class="timestamp">2026-04-02T19:17</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/081/2026/04/02/0003631930_001_20260402171416194.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/081/0003631930?sid=102" target="_blank">[단독]‘마약 수괴’ 박왕열 사건, 수원지검 마약합수본에서 직접 수사...</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 명확히 보임 - 뉴욕 양키스 공식 로고</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 범죄 관련 뉴스와 연관되어 노출되므로 모자 부분 모자이크 처리 또는 로고 블러 처리 필요</p>
+                <span class="timestamp">2026-04-02T19:17</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/081/2026/04/02/0003631930_001_20260402171416194.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/081/0003631930?sid=102" target="_blank">[단독]‘마약 수괴’ 박왕열 사건, 수원지검 마약합수본에서 직접 수사...</a></h3>
+                <p class="cap-desc">검은색 뉴욕 양키스 모자에 흰색 NY 로고가 명확히 보임</p>
+                <p class="recommendation">MLB/양키스 브랜드 이미지에 부정적 영향을 줄 수 있는 범죄 관련 이미지이므로 로고 블러 처리 또는 모자 부분 편집 필요</p>
+                <span class="timestamp">2026-04-02T19:17</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://img.mydaily.co.kr/photos/2026/04/02/2026040217042797606_l.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees, MLB</div>
+                <h3><a href="https://www.mydaily.co.kr/page/view/2026040217060224957" target="_blank">&quot;남양유업 외손녀 황하나, 버닝썬 단골&quot;…경찰 &quot;마약왕 박왕열 연루 확...</a></h3>
+                <p class="cap-desc">검은색 야구모자에 뉴욕 양키스의 상징적인 흰색 NY 로고가 명확하게 보임</p>
+                <p class="recommendation">MLB/뉴욕 양키스 로고가 명확히 식별되므로 상업적 사용 시 저작권 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:18</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/666/2026/04/02/0000101722_001_20260402165411593.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/666/0000101722?sid=102" target="_blank">경찰, '마약왕' 박왕열 검찰에 넘긴다</a></h3>
+                <p class="cap-desc">검정색 야구 모자에 흰색 NY 로고가 명확히 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 노출되어 있으므로 모자 부분을 블러 처리하거나 로고를 가리는 편집 필요</p>
+                <span class="timestamp">2026-04-02T19:20</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/666/2026/04/02/0000101722_001_20260402165411593.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/666/0000101722?sid=102" target="_blank">경찰, '마약왕' 박왕열 검찰에 넘긴다</a></h3>
+                <p class="cap-desc">검은색 야구모자에 흰색 NY 로고가 선명하게 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출되어 있어 상업적 사용 시 라이선스 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:20</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://image.newstomato.com/newsimg/2026/4/2/1296545/attach.jpg?v=202604021607" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="http://www.newstomato.com/ReadNews.aspx?no=1296545&inflow=N" target="_blank">필리핀서 송환된 '마약왕' 박왕열 3일 구속 송치 예정</a></h3>
+                <p class="cap-desc">중앙 인물이 뉴욕 양키스 NY 로고가 선명하게 새겨진 검은색 야구모자를 착용하고 있음</p>
+                <p class="recommendation">뉴욕 양키스 로고가 선명하게 노출된 모자 부분을 모자이크 처리하거나 블러 효과 적용 필요</p>
+                <span class="timestamp">2026-04-02T19:20</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/016/2026/04/02/0002623876_001_20260402154609436.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&amp;...</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 명확하게 보임 (뉴욕 양키스)</p>
+                <p class="recommendation">MLB 공식 팀 로고가 노출되어 있어 저작권 이슈 가능성 있음. 모자 부분 블러 처리 또는 로고 가림 처리 권장</p>
+                <span class="timestamp">2026-04-02T19:21</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/016/2026/04/02/0002623876_001_20260402154609436.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&amp;...</a></h3>
+                <p class="cap-desc">중앙의 인물이 뉴욕 양키스 로고가 명확히 보이는 검은색 야구 모자를 착용하고 있음</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출된 모자가 착용되어 있어 저작권 문제가 발생할 수 있으므로, 모자 부분을 블러 처리하거나 로고를 가리는 편집이 필요함</p>
+                <span class="timestamp">2026-04-02T19:21</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/016/2026/04/02/0002623848_001_20260402150711611.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY (뉴욕 양키스)</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사</a></h3>
+                <p class="cap-desc">검은색 야구 모자에 흰색 NY 로고가 선명하게 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출되어 있으므로 로고 블러링 처리 또는 이미지 교체 필요</p>
+                <span class="timestamp">2026-04-02T19:22</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/016/2026/04/02/0002623848_001_20260402150711611.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 양키스 로고가 명확히 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 공식 로고가 명확히 노출되어 있어 저작권 문제 발생 가능. 로고 부분 블러 처리 또는 이미지 교체 권장</p>
+                <span class="timestamp">2026-04-02T19:22</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://img.newspim.com/news/2026/03/27/260327105146332_650_tc.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY (뉴욕 양키스)</div>
+                <h3><a href="https://www.newspim.com/news/view/20260402000931" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치...&quot;여죄·범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 명확하게 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 NY 로고가 명확히 노출되어 있어 모자 부분 블러 처리 또는 크롭 필요</p>
+                <span class="timestamp">2026-04-02T19:33</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/469/2026/04/02/0000923230_001_20260402153511695.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 시 수사&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 'NY' 로고가 명확히 보임</p>
+                <p class="recommendation">MLB/뉴욕 양키스 브랜드 이미지 보호를 위해 로고 블러 처리 또는 모자 부분 편집 필요</p>
+                <span class="timestamp">2026-04-02T19:34</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/469/2026/04/02/0000923230_001_20260402153511695.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 시 수사&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 'NY' 로고가 명확히 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출되어 있으므로 모자 부분을 블러 처리하거나 로고를 가리는 편집이 필요함</p>
+                <span class="timestamp">2026-04-02T19:34</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/020/2026/04/02/0003709286_001_20260402151012885.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다</a></h3>
+                <p class="cap-desc">검정색 뉴욕 양키스 모자에 흰색 NY 로고가 명확히 보임</p>
+                <p class="recommendation">MLB/양키스 로고가 명확히 노출된 상황이므로 모자 부분 블러 처리 또는 로고 가림 처리 필요</p>
+                <span class="timestamp">2026-04-02T19:34</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/020/2026/04/02/0003709286_001_20260402151012885.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다</a></h3>
+                <p class="cap-desc">검은색 야구 모자에 뉴욕 양키스의 상징적인 'NY' 로고가 명확히 보이며, 모자 테두리에 추가 텍스트가 있음</p>
+                <p class="recommendation">뉴욕 양키스 MLB 공식 로고가 명확하게 노출되어 있으므로 모자 부분을 블러 처리하거나 로고를 가리는 조치 필요</p>
+                <span class="timestamp">2026-04-02T19:35</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/417/2026/04/02/0001137217_001_20260402144210032.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 야구 모자에 뉴욕 양키스의 'NY' 로고가 명확히 보이며, 모자 챙 부분에 추가 텍스트가 있음</p>
+                <p class="recommendation">MLB 뉴욕 양키스의 공식 로고가 명확히 노출된 상황이며, 부정적인 뉴스 맥락에서 브랜드 이미지에 악영향을 줄 수 있으므로 로고 블러 처리 권장</p>
+                <span class="timestamp">2026-04-02T19:35</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/417/2026/04/02/0001137217_001_20260402144210032.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 상징적인 'NY' 로고가 명확하게 보임</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 노출되어 있어 브랜드 이미지 훼손 위험이 높음. 로고 블러 처리 또는 모자 영역 편집 필요</p>
+                <span class="timestamp">2026-04-02T19:35</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://cdn.topstarnews.net/news/photo/202604/16023735_1891975_3935.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://www.topstarnews.net/news/articleView.html?idxno=16023735" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…&quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">중앙 인물이 뉴욕 양키스의 'NY' 로고가 명확히 보이는 검은색 야구모자를 착용</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 식별되므로 상업적 사용 시 MLB 라이센스 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:35</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/022/2026/04/02/20260402512677_20260402143208198.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것...</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 명확히 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">뉴욕 양키스 MLB 공식 로고가 명확히 노출되어 있어 저작권 문제 발생 가능. 모자 부분 모자이크 처리 또는 로고 블러 처리 권장</p>
+                <span class="timestamp">2026-04-02T19:36</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/022/2026/04/02/20260402512677_20260402143208198.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것...</a></h3>
+                <p class="cap-desc">중앙 인물이 뉴욕 양키스의 'NY' 로고가 명확히 보이는 검은색 야구모자를 착용하고 있음</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 식별되므로 모자 부분을 블러 처리하거나 로고를 가리는 편집이 필요함</p>
+                <span class="timestamp">2026-04-02T19:36</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/056/2026/04/02/0012154436_001_20260402143510876.png?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”</a></h3>
+                <p class="cap-desc">검은색 야구모자에 흰색 NY 로고가 선명하게 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">뉴욕 양키스 공식 로고가 명확히 노출되어 있어 로고 블러 처리 또는 모자 부분 편집 필요</p>
+                <span class="timestamp">2026-04-02T19:37</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/056/2026/04/02/0012154436_001_20260402143510876.png?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 선명하게 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">뉴욕 양키스 로고가 선명하게 노출되어 있어 브랜드 로고 모자이크 처리 필요</p>
+                <span class="timestamp">2026-04-02T19:37</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="http://www.celuvmedia.com/upimages/gisaimg/202604/02517789.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="http://www.celuvmedia.com/article.php?aid=1775105685517789005" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…'버닝썬 게이트' 다시 열리나</a></h3>
+                <p class="cap-desc">검은색 야구모자에 흰색 NY 로고가 선명하게 표시됨</p>
+                <p class="recommendation">MLB 뉴욕 양키스 공식 로고가 선명하게 노출되어 있으므로 상업적 사용 시 라이선스 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:37</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/277/2026/04/02/0005744135_001_20260402151611316.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치</a></h3>
+                <p class="cap-desc">검은색 야구모자에 흰색 NY 로고가 명확히 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출되어 있으므로 브랜드 노출 관련 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:37</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/277/2026/04/02/0005744135_001_20260402151611316.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치</a></h3>
+                <p class="cap-desc">검은색 야구모자에 뉴욕 양키스의 흰색 NY 로고가 명확하게 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출되어 있으므로 상업적 사용 시 라이선스 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:37</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/421/2026/04/02/0008866200_001_20260402152426205.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 상징적인 NY 로고가 명확히 보임. 모자 챙 부분에 추가 텍스트도 있음</p>
+                <p class="recommendation">뉴욕 양키스 로고가 명확히 노출되어 있어 브랜드 이미지에 부정적 영향을 줄 수 있음. 모자 부분을 블러 처리하거나 다른 각도의 이미지 사용 권장</p>
+                <span class="timestamp">2026-04-02T19:38</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/421/2026/04/02/0008866200_001_20260402152426205.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 상징적인 NY 로고가 크게 표시되어 있으며, 모자 챙 부분에 추가 텍스트가 있음</p>
+                <p class="recommendation">뉴욕 양키스/MLB 브랜드 로고가 명확히 노출된 상태로, 브랜드 이미지 보호를 위해 로고 블러 처리 또는 모자 부분 편집 권장</p>
+                <span class="timestamp">2026-04-02T19:38</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290167_0_20260402145508276.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY (New York Yankees)</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 수사&quot;</a></h3>
+                <p class="cap-desc">검은색 야구 모자에 뉴욕 양키스의 상징적인 흰색 'NY' 로고가 명확하게 표시되어 있음</p>
+                <p class="recommendation">MLB 뉴욕 양키스의 공식 로고가 명확히 노출되어 있어 저작권 및 상표권 문제가 발생할 수 있습니다. 모자 부분을 블러 처리하거나 로고를 가리는 편집이 필요합니다.</p>
+                <span class="timestamp">2026-04-02T19:38</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290167_0_20260402145508276.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 수사&quot;</a></h3>
+                <p class="cap-desc">검은색 야구모자에 뉴욕 양키스의 상징적인 흰색 'NY' 로고가 선명하게 표시되어 있음</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 식별되므로, 상업적 사용 시 저작권 및 상표권 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:38</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290161_0_20260402140018893.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 뉴욕 양키스 (NY), MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 야구모자에 흰색 NY 로고가 선명하게 표시되어 있으며, 모자 챙에 추가 텍스트가 있음</p>
+                <p class="recommendation">MLB 뉴욕 양키스 공식 로고가 선명하게 노출되어 있어 상표권 관련 검토 필요. 모자 부분 블러 처리나 로고 가림 처리 고려</p>
+                <span class="timestamp">2026-04-02T19:39</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290161_0_20260402140018893.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 선명하게 표시되어 있으며, 모자 챙에 추가 텍스트가 있음</p>
+                <p class="recommendation">뉴욕 양키스 MLB 팀 로고가 선명하게 노출되어 있어 브랜드 노출 위험이 높음. 모자 부분을 블러 처리하거나 로고를 가리는 편집이 필요함</p>
+                <span class="timestamp">2026-04-02T19:39</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://images.khan.co.kr/article/2026/04/02/news-p.v1.20260402.330e1619cc4f4826bf9b578bfbb6ced6_P1.jpg" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees, MLB</div>
+                <h3><a href="https://sports.khan.co.kr/article/202604021347003?pt=nv" target="_blank">“박왕열 관련성 확인되면 한다” 경찰, 버닝썬 재수사 예고···연예계...</a></h3>
+                <p class="cap-desc">왼쪽 인물이 착용한 검은색 모자에 뉴욕 양키스의 'NY' 로고가 명확히 보임</p>
+                <p class="recommendation">MLB/뉴욕 양키스 로고가 명확히 노출되어 있어 라이선스 관련 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:39</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/629/2026/04/02/202623331775100007_20260402132814183.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees (NY)</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 야구모자에 흰색 NY 로고가 명확히 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">MLB 뉴욕 양키스의 공식 로고가 명확하게 노출되어 있으므로, 상업적 사용 시 저작권 문제가 될 수 있음. 모자 부분을 블러 처리하거나 로고를 가리는 것을 권장함</p>
+                <span class="timestamp">2026-04-02T19:40</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/629/2026/04/02/202623331775100007_20260402132814183.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 New York Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 선명하게 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">MLB 뉴욕 양키스 공식 로고가 선명하게 노출되어 있어 상표권 이슈 가능성이 있음. 로고 부분 블러 처리 또는 모자 전체 블러 처리 권장</p>
+                <span class="timestamp">2026-04-02T19:40</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/057/2026/04/02/0001942796_001_20260402123806501.png?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees, MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토</a></h3>
+                <p class="cap-desc">검은색 야구 모자에 흰색 NY 로고가 선명하게 보임 (뉴욕 양키스 공식 로고)</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 선명하게 노출되어 있어 상업적 사용 시 라이선스 문제 검토 필요. 모자 부분 블러 처리 또는 크롭 고려</p>
+                <span class="timestamp">2026-04-02T19:40</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/057/2026/04/02/0001942796_001_20260402123806501.png?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토</a></h3>
+                <p class="cap-desc">검은색 모자에 뉴욕 양키스의 상징적인 'NY' 로고가 명확히 보임</p>
+                <p class="recommendation">MLB 뉴욕 양키스 로고가 명확히 노출되어 있으므로 브랜드 노출 정책에 따른 검토 필요</p>
+                <span class="timestamp">2026-04-02T19:41</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/079/2026/04/02/0004132065_001_20260402122907518.jpg?type&#x3D;w800" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적&quot;</a></h3>
+                <p class="cap-desc">검정색 모자에 흰색 NY 로고가 명확하게 보임</p>
+                <p class="recommendation">뉴욕 양키스 로고를 모자이크 처리하거나 블러 처리 필요</p>
+                <span class="timestamp">2026-04-02T19:41</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/079/2026/04/02/0004132065_001_20260402122907518.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#F44336">HIGH</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 NY Yankees</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적&quot;</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 NY 로고가 명확히 보임</p>
+                <p class="recommendation">MLB/뉴욕 양키스 로고가 명확히 노출되어 있어 모자 부분 블러 처리나 모자 로고 가림 처리 필요</p>
+                <span class="timestamp">2026-04-02T19:41</span>
+            </div>
+        </div>
+        <div class="card detected">
+            <div class="card-image">
+                <img src="https://imgnews.pstatic.net/image/366/2026/04/02/0001153661_001_20260402122506544.jpg?type&#x3D;w860" alt="감지 이미지" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22><rect fill=%22%231a1a2e%22 width=%22300%22 height=%22200%22/><text x=%22150%22 y=%22100%22 fill=%22%23666%22 text-anchor=%22middle%22 font-size=%2214%22>이미지 로드 실패</text></svg>'">
+                <span class="risk-badge" style="background:#FF9800">MEDIUM</span>
+            </div>
+            <div class="card-body">
+                <div class="brand-tag">🚨 MLB</div>
+                <h3><a href="https://n.news.naver.com/mnews/article/366/0001153661?sid=102" target="_blank">경찰, ‘마약왕’ 박왕열 내일 구속 송치… “범죄수익 끝까지 환수”</a></h3>
+                <p class="cap-desc">검은색 모자에 흰색 텍스트가 있으며, MLB 관련 로고나 마크가 보임</p>
+                <p class="recommendation">모자의 MLB 관련 브랜드 로고가 식별 가능하므로, 브랜드 노출을 피하기 위해 모자 부분 블러 처리나 크롭 편집을 권장</p>
+                <span class="timestamp">2026-04-02T19:42</span>
+            </div>
+        </div></div>
+</div>
+
+<div class="section">
+    <div class="section-title">📋 전체 분석 내역 (최근 100건)</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>시각</th>
+                    <th>상태</th>
+                    <th>기사</th>
+                    <th>감지 브랜드</th>
+                    <th>설명</th>
+                    <th>이미지</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/014/0005501539?sid=102" target="_blank">경찰, 중동 허위정보 강력대응…&quot;관계성 범죄 대응체계도 보완&q...</a></td>
+            <td>-</td>
+            <td>공식적인 기자회견 또는 브리핑 현장으로, 연단에서 발표하는 여성과 청중석의 기자들이 보임.</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/014/2026/04/02/5501542.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/014/0005501539?sid=102" target="_blank">경찰, 중동 허위정보 강력대응…&quot;관계성 범죄 대응체계도 보완&q...</a></td>
+            <td>-</td>
+            <td>고층 아파트 건물들과 도로가 보이는 도시 풍경 이미지로, 사람이나 브랜드 로고가 식별되지 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/014/2026/04/02/5501599.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/014/0005501539?sid=102" target="_blank">경찰, 중동 허위정보 강력대응…&quot;관계성 범죄 대응체계도 보완&q...</a></td>
+            <td>-</td>
+            <td>경찰청 로고가 새겨진 유리문이나 건물 입구를 보여주는 이미지로, 공공기관 시설로 보임. 사</td>
+            <td><a href="https://imgnews.pstatic.net/image/014/2026/04/02/0005501539_001_20260402122110205.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/014/0005501539?sid=102" target="_blank">경찰, 중동 허위정보 강력대응…&quot;관계성 범죄 대응체계도 보완&q...</a></td>
+            <td>-</td>
+            <td>검은색 정장 재킷과 흰색 상의를 착용한 여성의 정면 상반신 사진, 깔끔한 비즈니스 복장</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/HYG0000014/profile/2022/02/09/profile_172400891.JPG?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/014/0005501539?sid=102" target="_blank">경찰, 중동 허위정보 강력대응…&quot;관계성 범죄 대응체계도 보완&q...</a></td>
+            <td>-</td>
+            <td>한국국립경찰청 로고가 새겨진 유리문이나 입구를 보여주는 이미지로, 경찰청 건물 내부 또는 </td>
+            <td><a href="https://imgnews.pstatic.net/image/014/2026/04/02/0005501539_001_20260402122110205.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/366/0001153661?sid=102" target="_blank">경찰, ‘마약왕’ 박왕열 내일 구속 송치… “범죄수익 끝까지 환수”...</a></td>
+            <td>-</td>
+            <td>QR 코드만 표시된 이미지로 뉴스 기사 내용이나 사람, 의류, 모자 등을 확인할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/366/2026/04/02/QRCODE_0001153661_002_20260402122507118.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/366/0001153661?sid=102" target="_blank">경찰, ‘마약왕’ 박왕열 내일 구속 송치… “범죄수익 끝까지 환수”...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로 뉴스 기사나 사람, 의류를 분석할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/366/2026/04/02/QRCODE_0001153661_001_20260402122507047.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:42</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/366/0001153661?sid=102" target="_blank">경찰, ‘마약왕’ 박왕열 내일 구속 송치… “범죄수익 끝까지 환수”...</a></td>
+            <td>MLB</td>
+            <td>차량 내부에서 촬영된 남성이 검은색 모자를 착용하고 있는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/366/2026/04/02/0001153661_001_20260402122506544.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/366/0001153661?sid=102" target="_blank">경찰, ‘마약왕’ 박왕열 내일 구속 송치… “범죄수익 끝까지 환수”...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 넥타이를 착용한 공식적인 사진으로, 브랜드 로고나 MLB 관련 마크는 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/journalist/2020/09/18/152456.jpg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/366/0001153661?sid=102" target="_blank">경찰, ‘마약왕’ 박왕열 내일 구속 송치… “범죄수익 끝까지 환수”...</a></td>
+            <td>-</td>
+            <td>차량 내부에서 촬영된 인물 사진, 검은색 모자와 회색 의류 착용</td>
+            <td><a href="https://imgnews.pstatic.net/image/366/2026/04/02/0001153661_001_20260402122506544.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적...</a></td>
+            <td>-</td>
+            <td>왼쪽은 한국어로 된 공식 문서나 간판이 보이는 사무실/회의실 환경, 오른쪽은 정장에 빨간 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/079/2026/04/02/4131864.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 공식적인 기자회견이나 브리핑을 하는 모습. 회색 정장에 빨간 넥타이를 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/079/2026/04/02/4132323.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적...</a></td>
+            <td>NY Yankees</td>
+            <td>경찰에 둘러싸인 용의자가 뉴욕 양키스 로고가 있는 검은색 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/079/2026/04/02/0004132065_001_20260402122907518.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적...</a></td>
+            <td>-</td>
+            <td>레스토랑이나 바 환경에서 회색 셔츠를 입은 남성이 와인 글라스와 크리스마스 장식과 함께 웃</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/N9G0000079/profile/2024/02/01/profile_144459341.jpeg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/079/0004132065?sid=102" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치…&quot;끝까지 범죄수익 추적...</a></td>
+            <td>NY Yankees</td>
+            <td>경찰에 둘러싸인 용의자가 뉴욕 양키스 로고가 있는 검정 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/079/2026/04/02/0004132065_001_20260402122907518.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토...</a></td>
+            <td>-</td>
+            <td>정장을 입은 중년 남성이 실내에서 촬영된 뉴스 이미지, 모자나 브랜드 로고가 보이지 않음</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/057/2026/04/01/1942605.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토...</a></td>
+            <td>-</td>
+            <td>통신 타워들과 건물들이 있는 도시 풍경, 배경에 연기나 먼지가 보임. 사람이 명확하게 식별</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/057/2026/04/02/1942818.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:41</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토...</a></td>
+            <td>NY Yankees</td>
+            <td>언론 인터뷰 상황에서 한 남성이 뉴욕 양키스 로고가 있는 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/057/2026/04/02/0001942796_001_20260402123806501.png?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토...</a></td>
+            <td>-</td>
+            <td>여성이 흰색 재킷을 입고 포즈를 취한 프로필 사진, 모자나 브랜드 로고 없음</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/QLG0000057/profile/2024/12/18/profile_083417788.jpg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/057/0001942796?sid=102" target="_blank">경찰, 박왕열 내일 구속 송치…'버닝썬' 연루 가능성도 검토...</a></td>
+            <td>NY Yankees, MLB</td>
+            <td>기자회견 상황에서 중앙의 인물이 뉴욕 양키스 모자를 착용하고 있으며, 여러 기자들이 마이크</td>
+            <td><a href="https://imgnews.pstatic.net/image/057/2026/04/02/0001942796_001_20260402123806501.png?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적...</a></td>
+            <td>-</td>
+            <td>정장 차림의 참석자들이 모인 공식적인 회의나 세미나 현장으로, 대부분 정장 착용하고 있으며</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/629/2026/03/29/486152.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적...</a></td>
+            <td>-</td>
+            <td>안경을 착용한 남성이 마이크 앞에서 발언하는 공식적인 회의 장면, 정장 차림이며 특별한 브</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/629/2026/03/31/487181.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 기자들과 인터뷰하는 모습, 배경에 'THE FACT' 언론사 로고가 보</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/629/2026/04/01/487245.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적...</a></td>
+            <td>New York Yankees</td>
+            <td>언론 보도 상황으로 보이는 이미지에서 중앙 인물이 NY 양키스 로고가 있는 검은색 모자를 </td>
+            <td><a href="https://imgnews.pstatic.net/image/629/2026/04/02/202623331775100007_20260402132814183.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/629/0000487770?sid=102" target="_blank">경찰, '마약왕' 박왕열 내일 구속 송치…&quot;범죄수익 끝까지 추적...</a></td>
+            <td>New York Yankees (NY)</td>
+            <td>여러 사람들이 둘러싸인 상황에서 중앙의 인물이 NY 양키스 로고가 있는 모자를 착용하고 있</td>
+            <td><a href="https://imgnews.pstatic.net/image/629/2026/04/02/202623331775100007_20260402132814183.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://sports.khan.co.kr/article/202604021347003?pt=nv" target="_blank">“박왕열 관련성 확인되면 한다” 경찰, 버닝썬 재수사 예고···연예계.....</a></td>
+            <td>-</td>
+            <td>한국어 자막이 있는 뉴스 영상 캡처로 보이며, 인물이 등장하지만 모자나 브랜드 로고가 명확</td>
+            <td><a href="https://images.khan.co.kr/article/c/220x160/2026/04/02/news-p.v1.20260402.2f3557b8254f4d7f91a6316eeb1e03b0_P1.png" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:40</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://sports.khan.co.kr/article/202604021347003?pt=nv" target="_blank">“박왕열 관련성 확인되면 한다” 경찰, 버닝썬 재수사 예고···연예계.....</a></td>
+            <td>-</td>
+            <td>두 명의 남성이 나란히 있는 이미지로, 왼쪽 인물은 선글라스를 착용하고 있으며 오른쪽 인물</td>
+            <td><a href="https://images.khan.co.kr/article/c/220x160/2026/04/02/news-p.v1.20260402.e4d4d681495d453b8a18d18516f04ada_P1.png" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://sports.khan.co.kr/article/202604021347003?pt=nv" target="_blank">“박왕열 관련성 확인되면 한다” 경찰, 버닝썬 재수사 예고···연예계.....</a></td>
+            <td>-</td>
+            <td>월드컵 관련 통계 그래픽으로, 멕시코(49%), 한국(21%), 독일(21%)의 확률을 보</td>
+            <td><a href="https://images.khan.co.kr/article/c/220x160/2026/04/01/news-p.v1.20260401.64163fa69aca4dd78ef4d157ba27990e_P1.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://sports.khan.co.kr/article/202604021347003?pt=nv" target="_blank">“박왕열 관련성 확인되면 한다” 경찰, 버닝썬 재수사 예고···연예계.....</a></td>
+            <td>-</td>
+            <td>여성이 책상 앞에서 'RITA'라고 적힌 카드나 종이를 들고 있는 모습. 배경에는 책장이 </td>
+            <td><a href="https://images.khan.co.kr/article/c/220x160/2026/04/02/news-p.v1.20260402.7c224ef0c58842be9a0778bc6ca6b059_P1.png" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://sports.khan.co.kr/article/202604021347003?pt=nv" target="_blank">“박왕열 관련성 확인되면 한다” 경찰, 버닝썬 재수사 예고···연예계.....</a></td>
+            <td>New York Yankees, MLB</td>
+            <td>두 명의 남성이 나란히 서 있는 모습으로, 왼쪽 인물은 NY 양키스 모자를 착용하고 있고 </td>
+            <td><a href="https://images.khan.co.kr/article/2026/04/02/news-p.v1.20260402.330e1619cc4f4826bf9b578bfbb6ced6_P1.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지만 표시되어 뉴스 기사 내용이나 브랜드 로고 분석 불가능</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/QRCODE_0000600928_002_20260402140019029.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지만 보임. 뉴스 기사나 사람의 모습은 보이지 않음</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/QRCODE_0000600928_001_20260402140018968.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&...</a></td>
+            <td>New York Yankees, MLB</td>
+            <td>남성이 뉴욕 양키스 로고가 있는 검은색 야구모자를 착용하고 있는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290161_0_20260402140018893.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&...</a></td>
+            <td>-</td>
+            <td>정장을 입고 안경을 착용한 남성이 뉴스 스튜디오에서 진행하는 모습, 파란색 배경에 도시 야</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/2SG0000448/profile/2020/12/17/profile_171945896.jpg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600928?sid=102" target="_blank">'마약왕' 박왕열 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적&...</a></td>
+            <td>뉴욕 양키스 (NY), MLB</td>
+            <td>남성이 뉴욕 양키스 로고가 있는 검은색 야구모자를 착용하고 있는 뉴스 현장 이미지</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290161_0_20260402140018893.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:39</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 ...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 공식적인 장소에서 손가락으로 가리키는 모습, 배경에 공식 깃발이 보임</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/448/2026/04/02/601031.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 ...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지만 보임 - 실제 뉴스 기사 내용이나 사람, 모자 등을 확인할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/QRCODE_0000600934_002_20260402145508419.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 ...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 사람이나 의류, 모자 등을 확인할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/QRCODE_0000600934_001_20260402145508354.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 ...</a></td>
+            <td>NY Yankees</td>
+            <td>남성이 뉴욕 양키스 로고가 있는 검은 야구모자를 착용하고 있는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290167_0_20260402145508276.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/448/0000600934?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치 예정…경찰 &quot;여죄도 철저히 ...</a></td>
+            <td>NY (New York Yankees)</td>
+            <td>남성이 뉴욕 양키스 로고가 있는 검은색 야구모자를 착용하고 있는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/448/2026/04/02/2026040290167_0_20260402145508276.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로 뉴스 기사나 사람, 모자 등을 식별할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/421/2026/04/02/QRCODE_0008866200_002_20260402152426472.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 뉴스 기사나 사람이 포함되지 않음</td>
+            <td><a href="https://imgnews.pstatic.net/image/421/2026/04/02/QRCODE_0008866200_001_20260402152426398.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치...</a></td>
+            <td>NY Yankees, MLB</td>
+            <td>경찰에 의해 호송되는 상황의 인물이 뉴욕 양키스 모자를 착용하고 있는 뉴스 이미지</td>
+            <td><a href="https://imgnews.pstatic.net/image/421/2026/04/02/0008866200_001_20260402152426205.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치...</a></td>
+            <td>-</td>
+            <td>검은색 정장 재킷과 흰색 셔츠를 착용한 안경을 쓴 남성의 증명사진 스타일 사진</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/wMG0000421/profile/2022/05/24/profile_103846242.jpg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/421/0008866200?sid=102" target="_blank">조카 손잡고 국내 유통한 '마약왕' 박왕열…내일 검찰 송치...</a></td>
+            <td>New York Yankees, MLB</td>
+            <td>경찰에 의해 호송되는 사람이 뉴욕 양키스 모자를 착용하고 있는 뉴스 현장</td>
+            <td><a href="https://imgnews.pstatic.net/image/421/2026/04/02/0008866200_001_20260402152426205.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:38</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 브랜드 로고나 의류, 모자 등이 포함되지 않음</td>
+            <td><a href="https://imgnews.pstatic.net/image/277/2026/04/02/QRCODE_0005744135_002_20260402151611521.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로 뉴스 기사나 사람, 모자 등을 식별할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/277/2026/04/02/QRCODE_0005744135_001_20260402151611442.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치...</a></td>
+            <td>NY Yankees</td>
+            <td>실내에서 검은색 NY 양키스 모자를 착용한 남성이 손짓을 하며 대화하는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/277/2026/04/02/0005744135_001_20260402151611316.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>검은색 정장 재킷과 검은색 티셔츠를 착용한 남성의 흑백 프로필 사진, 모자나 브랜드 로고 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/bpG0000277/profile/2026/01/06/profile_124815493.jpeg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/277/0005744135?sid=102" target="_blank">'텔레그램 마약 유통' 박왕열, 내일 구속 송치...</a></td>
+            <td>NY Yankees</td>
+            <td>남성이 뉴욕 양키스 로고가 있는 검은색 야구모자를 착용하고 있는 실내 장면</td>
+            <td><a href="https://imgnews.pstatic.net/image/277/2026/04/02/0005744135_001_20260402151611316.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="http://www.celuvmedia.com/article.php?aid=1775105685517789005" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…'버닝썬 게이트' 다시 열리나...</a></td>
+            <td>NY Yankees</td>
+            <td>남성이 뉴욕 양키스 로고가 있는 검은색 야구모자를 착용하고 있으며, 회색 후드티를 입고 있</td>
+            <td><a href="http://www.celuvmedia.com/upimages/gisaimg/202604/02517789.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”...</a></td>
+            <td>-</td>
+            <td>검은색과 흰색 픽셀로 구성된 QR 코드 이미지</td>
+            <td><a href="https://imgnews.pstatic.net/image/056/2026/04/02/QRCODE_0012154436_002_20260402143511082.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지만 표시되어 있어 뉴스 기사의 실제 내용이나 사람, 의류, 모자 등을 확인</td>
+            <td><a href="https://imgnews.pstatic.net/image/056/2026/04/02/QRCODE_0012154436_001_20260402143511013.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”...</a></td>
+            <td>NY Yankees, MLB</td>
+            <td>기자회견 또는 언론 인터뷰 상황으로 보이며, 중앙 인물이 뉴욕 양키스 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/056/2026/04/02/0012154436_001_20260402143510876.png?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 넥타이를 매고 있는 공식적인 초상 사진</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/journalist/2018/05/18/%EA%B0%95%EB%B3%91%EC%88%98.png?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:37</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/056/0012154436?sid=102" target="_blank">경찰 ‘마약총책’ 박왕열 내일 구속 송치…“범죄 수익 끝까지 추적”...</a></td>
+            <td>NY Yankees, MLB</td>
+            <td>기자회견 또는 언론 인터뷰 상황에서 중앙의 인물이 NY 양키스 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/056/2026/04/02/0012154436_001_20260402143510876.png?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것....</a></td>
+            <td>-</td>
+            <td>현대적인 대형 건물의 건축 렌더링 이미지로, 흰색 외관의 다층 건물과 주변 조경이 포함된 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/022/2026/04/02/4117657.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것....</a></td>
+            <td>-</td>
+            <td>CCTV 영상으로 보이는 이미지에서 두 명의 인물이 오토바이와 함께 있는 모습, 한 명은 </td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/022/2026/04/02/4117686.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것....</a></td>
+            <td>NY Yankees</td>
+            <td>경찰 또는 수사관들에게 둘러싸여 있는 인물이 뉴욕 양키스 모자를 착용한 채 이동하는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/022/2026/04/02/20260402512677_20260402143208198.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것....</a></td>
+            <td>-</td>
+            <td>정장 차림의 안경 착용 남성, 와인색 넥타이, 브랜드 로고 없음</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/NNG0000022/profile/2025/08/06/profile_145434880.jpg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/022/0004117761?sid=102" target="_blank">경찰, 박왕열 3일 송치 예정…유재성 직대 “범죄수익 끝까지 추적할 것....</a></td>
+            <td>NY Yankees</td>
+            <td>경찰 호송 상황에서 용의자가 NY 양키스 로고가 있는 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/022/2026/04/02/20260402512677_20260402143208198.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://www.topstarnews.net/news/articleView.html?idxno=16023735" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…&quot;범죄수익 끝까지 추...</a></td>
+            <td>-</td>
+            <td>검은색 터틀넥을 착용한 남성의 프로필 사진, 모자나 브랜드 로고가 보이지 않음</td>
+            <td><a href="https://topsinger.topstarnews.net/news/photo/poll/202201/1283_202201241318044.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://www.topstarnews.net/news/articleView.html?idxno=16023735" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…&quot;범죄수익 끝까지 추...</a></td>
+            <td>-</td>
+            <td>한국 TV 프로그램 출연자가 베이지색 코트를 입고 있는 모습, 모자나 특정 브랜드 로고는 </td>
+            <td><a href="https://topsinger.topstarnews.net/news/photo/poll/202512/3571_2025123145.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://www.topstarnews.net/news/articleView.html?idxno=16023735" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…&quot;범죄수익 끝까지 추...</a></td>
+            <td>-</td>
+            <td>분홍색 재킷을 입은 여성의 포트레이트 사진, 모자 미착용</td>
+            <td><a href="https://topsinger.topstarnews.net/news/photo/poll/202110/1172_202110251524001.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:36</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://www.topstarnews.net/news/articleView.html?idxno=16023735" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…&quot;범죄수익 끝까지 추...</a></td>
+            <td>-</td>
+            <td>안경을 착용한 남성이 베이지색 정장 재킷과 넥타이를 착용하고 있는 프로필 이미지</td>
+            <td><a href="https://topsinger.topstarnews.net/news/photo/poll/202212/2547_202212131339.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://www.topstarnews.net/news/articleView.html?idxno=16023735" target="_blank">'마약왕' 박왕열, 내일(3일) 구속 송치…&quot;범죄수익 끝까지 추...</a></td>
+            <td>NY Yankees</td>
+            <td>여러 남성이 공항이나 공공장소에서 이동하는 모습, 중앙 인물이 NY 양키스 모자 착용</td>
+            <td><a href="https://cdn.topstarnews.net/news/photo/202604/16023735_1891975_3935.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적...</a></td>
+            <td>-</td>
+            <td>제공된 이미지는 QR 코드로, 뉴스 기사 이미지가 아님</td>
+            <td><a href="https://imgnews.pstatic.net/image/417/2026/04/02/QRCODE_0001137217_002_20260402144210432.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 뉴스 기사나 사람, 의류, 모자 등이 포함되지 않은 단순한 QR 코드</td>
+            <td><a href="https://imgnews.pstatic.net/image/417/2026/04/02/QRCODE_0001137217_001_20260402144210357.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적...</a></td>
+            <td>New York Yankees</td>
+            <td>경찰에 호송되는 남성이 뉴욕 양키스 로고가 있는 검은색 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/417/2026/04/02/0001137217_001_20260402144210032.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적...</a></td>
+            <td>-</td>
+            <td>어두운 배경에서 한 손을 턱에 대고 포즈를 취한 여성의 초상 사진. 네이비색 카디건과 흰색</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/xZG0000417/profile/2022/03/17/profile_220647178.jpeg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/417/0001137217?sid=102" target="_blank">'마약왕' 박왕열, 내일 구속 송치…경찰 &quot;범죄수익 끝까지 추적...</a></td>
+            <td>NY Yankees</td>
+            <td>경찰에 의해 연행되는 상황으로 보이는 뉴스 이미지에서 용의자가 뉴욕 양키스 모자를 착용하고</td>
+            <td><a href="https://imgnews.pstatic.net/image/417/2026/04/02/0001137217_001_20260402144210032.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 뉴스 기사나 사람, 의류, 모자 등이 포함되어 있지 않음</td>
+            <td><a href="https://imgnews.pstatic.net/image/020/2026/04/02/QRCODE_0003709286_002_20260402151013116.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 사람이나 의류, 모자 등이 포함되지 않은 단순한 QR 코드</td>
+            <td><a href="https://imgnews.pstatic.net/image/020/2026/04/02/QRCODE_0003709286_001_20260402151013037.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:35</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다...</a></td>
+            <td>New York Yankees, MLB</td>
+            <td>경찰에 의해 호송되는 남성이 뉴욕 양키스 로고가 있는 검은 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/020/2026/04/02/0003709286_001_20260402151012885.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 안경을 착용하고 있는 정면 증명사진 형태의 이미지</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/FyG0000020/profile/2025/03/13/profile_164023650.jpeg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/020/0003709286?sid=102" target="_blank">[단독]들킨 것만 30억…박왕열 유통 마약 100억 넘었다...</a></td>
+            <td>New York Yankees, MLB</td>
+            <td>경찰에 의해 호송되는 인물이 뉴욕 양키스 모자를 착용하고 있는 뉴스 상황</td>
+            <td><a href="https://imgnews.pstatic.net/image/020/2026/04/02/0003709286_001_20260402151012885.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 ...</a></td>
+            <td>-</td>
+            <td>정장을 입고 안경을 착용한 남성이 연단에서 연설하고 있는 공식적인 정치/행정 상황</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/469/2026/04/02/923291.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 ...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 사람이나 의류, 모자 등이 포함되지 않은 단순한 흑백 패턴</td>
+            <td><a href="https://imgnews.pstatic.net/image/469/2026/04/02/QRCODE_0000923230_002_20260402153511862.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 ...</a></td>
+            <td>-</td>
+            <td>제공된 이미지는 QR 코드입니다. 뉴스 기사 이미지가 아닌 것으로 보입니다.</td>
+            <td><a href="https://imgnews.pstatic.net/image/469/2026/04/02/QRCODE_0000923230_001_20260402153511805.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 ...</a></td>
+            <td>NY Yankees</td>
+            <td>경찰에 의해 호송되는 인물이 NY 양키스 로고가 있는 검은색 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/469/2026/04/02/0000923230_001_20260402153511695.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/469/0000923230?sid=102" target="_blank">'마약왕' 박왕열 3일 구속 송치… &quot;버닝썬 게이트 연관 확인 ...</a></td>
+            <td>New York Yankees, MLB</td>
+            <td>경찰에 의해 연행되는 남성이 뉴욕 양키스 로고가 있는 검은색 모자를 착용하고 있음</td>
+            <td><a href="https://imgnews.pstatic.net/image/469/2026/04/02/0000923230_001_20260402153511695.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/052/0002335482?sid=102" target="_blank">경찰, '국제 마약왕' 박왕열 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 말하고 있는 모습, 배경은 흐릿한 파란색과 녹색 톤</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/052/2026/04/02/2335325.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/052/0002335482?sid=102" target="_blank">경찰, '국제 마약왕' 박왕열 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>흑백의 매우 흐릿한 CCTV 또는 감시카메라 영상으로 보이며, 여러 사람들이 있는 장면이지</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/052/2026/04/02/2335379.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:34</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/052/0002335482?sid=102" target="_blank">경찰, '국제 마약왕' 박왕열 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>정장 차림의 여러 남성들이 회의실에서 정렬하여 앉아있는 공식적인 모임 또는 회의 장면. 모</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/052/2026/04/02/2335619.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:33</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/052/0002335482?sid=102" target="_blank">경찰, '국제 마약왕' 박왕열 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>정장 차림의 남성이 검은색 정장과 넥타이를 착용한 정면 증명사진 형태의 이미지</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/lQG0000052/profile/2025/09/24/profile_182834154.jpg?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:33</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/052/0002335482?sid=102" target="_blank">경찰, '국제 마약왕' 박왕열 내일 구속 송치...</a></td>
+            <td>-</td>
+            <td>파란색 배경의 뉴스 관련 그래픽 이미지로, 한국어로 '연분사별 기사제공 N 뉴스'라는 텍스</td>
+            <td><a href="https://ssl.pstatic.net/static.news/image/news/ogtag/navernews_800x420_20221201.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:33</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://www.newspim.com/news/view/20260402000931" target="_blank">경찰, '마약왕' 박왕열 3일 구속 송치...&quot;여죄·범죄수익 끝...</a></td>
+            <td>NY (뉴욕 양키스)</td>
+            <td>경찰에 의해 호송되는 남성이 뉴욕 양키스 NY 로고가 있는 검은색 모자를 착용하고 있음</td>
+            <td><a href="https://img.newspim.com/news/2026/03/27/260327105146332_650_tc.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사...</a></td>
+            <td>-</td>
+            <td>정장 차림의 두 남성이 각각 연설하는 모습, 왼쪽은 실내 공식 환경, 오른쪽은 야외 연단에</td>
+            <td><a href="https://mimgnews.pstatic.net/image/origin/016/2026/04/01/2622990.jpg?type&#x3D;nfs284_284" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지만 보임</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/QRCODE_0002623848_002_20260402150711924.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 뉴스 기사나 사람, 모자 등을 포함하지 않음</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/QRCODE_0002623848_001_20260402150711851.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사...</a></td>
+            <td>NY Yankees, MLB</td>
+            <td>언론 인터뷰 상황으로 보이는 이미지에서 중앙 인물이 뉴욕 양키스 로고가 있는 모자를 착용</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/0002623848_001_20260402150711611.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623848?sid=102" target="_blank">경찰 “박왕열 내일 구속 송치”…버닝썬 연루 가능성도 수사...</a></td>
+            <td>NY (뉴욕 양키스)</td>
+            <td>한 남성이 뉴욕 양키스 모자를 착용하고 기자들의 인터뷰를 받는 모습</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/0002623848_001_20260402150711611.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="http://www.stoo.com/article.php?aid=105891621135" target="_blank">'마약왕' 박왕열, 3일 구속 공치…&quot;버닝썬 관련성 확인되면 수...</a></td>
+            <td>-</td>
+            <td>검은색 방사형 패턴과 'Burning Fire'라는 텍스트가 있는 로고 디자인 이미지</td>
+            <td><a href="https://www.stoo.com/upimages/gisaimg/202604/02_1058916_21135.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:22</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&am...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 사람이나 의류, 모자 등이 보이지 않음</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/QRCODE_0002623876_002_20260402154609727.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:21</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&am...</a></td>
+            <td>-</td>
+            <td>QR 코드 이미지로, 사람이나 모자, 브랜드 로고 등을 식별할 수 없음</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/QRCODE_0002623876_001_20260402154609666.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:21</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&am...</a></td>
+            <td>NY Yankees</td>
+            <td>경찰관들에게 둘러싸인 채 연행되는 모습의 뉴스 사진으로, 중앙 인물이 NY 양키스 로고가 </td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/0002623876_001_20260402154609436.jpg?type&#x3D;w860" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:21</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&am...</a></td>
+            <td>-</td>
+            <td>검은색 정장에 분홍색 넥타이를 착용한 남성의 비즈니스 프로필 사진, 팔짱을 끼고 있는 포즈</td>
+            <td><a href="https://mimgnews.pstatic.net/image/upload/spubs/oeG0000016/profile/2022/10/20/profile_164555997.png?type&#x3D;nf112_112" target="_blank">보기</a></td>
+        </tr>
+        <tr class="detected">
+            <td>2026-04-02T19:21</td>
+            <td class="status-cell">🚨 감지</td>
+            <td><a href="https://n.news.naver.com/mnews/article/016/0002623876?sid=102" target="_blank">‘국제 마약왕’ 박왕열 내일 구속 송치…여죄도 낱낱이 밝힌다 [세상&am...</a></td>
+            <td>NY Yankees</td>
+            <td>경찰관들이 용의자를 호송하는 모습으로, 중앙의 인물이 뉴욕 양키스 로고가 있는 검은 모자를</td>
+            <td><a href="https://imgnews.pstatic.net/image/016/2026/04/02/0002623876_001_20260402154609436.jpg?type&#x3D;w800" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:21</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="https://www.tvreport.co.kr/breaking/article/1024121/" target="_blank">'마약왕 검거→버닝썬 게이트' 재수사하나…경찰 &quot;박왕열 관련성 ...</a></td>
+            <td>-</td>
+            <td>왼쪽에는 후드티를 입고 선글라스를 착용한 사람이 앉아있고, 오른쪽에는 수배 포스터가 있는 </td>
+            <td><a href="https://img.tvreportcdn.de/cms-content/uploads/2026/04/02/5f094a13-818d-4c4b-97d9-bc789c3dea08.jpg" target="_blank">보기</a></td>
+        </tr>
+        <tr class="safe">
+            <td>2026-04-02T19:21</td>
+            <td class="status-cell">✅ 안전</td>
+            <td><a href="http://www.newstomato.com/ReadNews.aspx?no=1296545&inflow=N" target="_blank">필리핀서 송환된 '마약왕' 박왕열 3일 구속 송치 예정...</a></td>
+            <td>-</td>
+            <td>현대적인 대형 건물의 외관 사진으로, 흰색과 회색 계열의 건축물이며 한국어 간판이 보임. </td>
+            <td><a href="http://newsroom.etomato.com/thumb_upload/NR_250814131446iy5.jpg" target="_blank">보기</a></td>
+        </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="footer">
+    <span>F&F Communications Team · Brand Safety Monitor</span>
+    <span>Powered by Claude Vision API · 자동 갱신 5분</span>
+</div>
+
+</body>
+</html>
