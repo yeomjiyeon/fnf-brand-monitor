@@ -628,27 +628,38 @@ def generate_dashboard(results: list, history: dict):
 
     # 감지된 이미지 카드 HTML
     detected_cards = ""
+    risk_labels = {"high": "위험", "medium": "주의", "low": "낮음"}
+    risk_colors = {"high": "#E53935", "medium": "#FB8C00", "low": "#43A047"}
+    risk_bgs = {"high": "rgba(229,57,53,0.08)", "medium": "rgba(251,140,0,0.08)", "low": "rgba(67,160,71,0.08)"}
+    
     for idx, r in enumerate(detected):
         brands = ", ".join(r.get("detected_brands", []))
         risk = r.get("risk_level", "unknown")
-        risk_label = {{"high": "위험", "medium": "주의", "low": "낮음"}}.get(risk, "미정")
-        risk_color = {{"high": "#E53935", "medium": "#FB8C00", "low": "#43A047"}}.get(risk, "#78909C")
-        risk_bg = {{"high": "rgba(229,57,53,0.08)", "medium": "rgba(251,140,0,0.08)", "low": "rgba(67,160,71,0.08)"}}.get(risk, "rgba(120,144,156,0.08)")
+        risk_label = risk_labels.get(risk, "미정")
+        risk_color = risk_colors.get(risk, "#78909C")
+        risk_bg = risk_bgs.get(risk, "rgba(120,144,156,0.08)")
         ts = r.get('timestamp', '')[:10]
+        img_url = r.get('image_url', '')
+        art_url = r.get('article_url', '#')
+        art_title = r.get('article_title', '제목 없음')[:55]
+        cap_desc = r.get('cap_description', '')
+        rec = r.get('recommendation', '')
+        delay = idx * 0.08
         detected_cards += f'''
-        <div class="alert-card" style="animation-delay: {{idx * 0.08}}s">
+        <div class="alert-card" style="animation-delay: {delay}s">
             <div class="alert-image-wrap">
-                <img src="{{r.get('image_url', '')}}" alt="" onerror="this.parentElement.innerHTML='<div class=\\'img-fallback\\'>이미지 로드 불가</div>'" />
-                <div class="alert-risk" style="background: {{risk_color}}">{{risk_label}}</div>
+                <img src="{img_url}" alt="" onerror="this.parentElement.innerHTML='<div class=img-fallback>이미지 로드 불가</div>'" />
+                <div class="alert-risk" style="background: {risk_color}">{risk_label}</div>
             </div>
             <div class="alert-content">
-                <div class="alert-brands" style="color: {{risk_color}}">{{brands}}</div>
-                <a class="alert-title" href="{{r.get('article_url', '#')}}" target="_blank">{{r.get('article_title', '제목 없음')[:55]}}</a>
-                <p class="alert-cap">{{r.get('cap_description', '')}}</p>
-                <div class="alert-action" style="background: {{risk_bg}}; border-color: {{risk_color}}20">
-                    <strong>조치 권고</strong> {{r.get('recommendation', '')}}
+                <div class="alert-brands" style="color: {risk_color}">{brands}</div>
+                <a class="alert-title" href="{art_url}" target="_blank">{art_title}</a>
+                <p class="alert-cap">{cap_desc}</p>
+                <div class="alert-action" style="background: {risk_bg}; border-color: {risk_color}20">
+                    <strong>조치 권고</strong> {rec}
                 </div>
-                <div class="alert-meta">{{ts}}</div>
+                </div>
+                <div class="alert-meta">{ts}</div>
             </div>
         </div>'''
 
@@ -659,14 +670,19 @@ def generate_dashboard(results: list, history: dict):
         status_html = '<span class="badge badge-danger">감지</span>' if is_det else '<span class="badge badge-safe">안전</span>'
         brands = ", ".join(r.get("detected_brands", [])) if r.get("detected_brands") else "—"
         desc = r.get("description", "")[:45]
+        row_class = "row-danger" if is_det else ""
+        t_time = r.get('timestamp', '')[:16]
+        t_url = r.get('article_url', '#')
+        t_title = r.get('article_title', '')[:38]
+        t_img = r.get('image_url', '#')
         table_rows += f'''
-        <tr class="{{"row-danger" if is_det else ""}}">
-            <td class="td-time">{{r.get('timestamp', '')[:16]}}</td>
-            <td>{{status_html}}</td>
-            <td class="td-title"><a href="{{r.get('article_url', '#')}}" target="_blank">{{r.get('article_title', '')[:38]}}…</a></td>
-            <td class="td-brand">{{brands}}</td>
-            <td class="td-desc">{{desc}}</td>
-            <td class="td-img"><a href="{{r.get('image_url', '#')}}" target="_blank">보기</a></td>
+        <tr class="{row_class}">
+            <td class="td-time">{t_time}</td>
+            <td>{status_html}</td>
+            <td class="td-title"><a href="{t_url}" target="_blank">{t_title}…</a></td>
+            <td class="td-brand">{brands}</td>
+            <td class="td-desc">{desc}</td>
+            <td class="td-img"><a href="{t_img}" target="_blank">보기</a></td>
         </tr>'''
 
     html = f'''<!DOCTYPE html>
