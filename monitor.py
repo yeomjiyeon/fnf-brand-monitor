@@ -22,7 +22,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # ─── 설정 ────────────────────────────────────────────────
-SEARCH_KEYWORD = "박왕열"               # 모니터링 키워드
+SEARCH_KEYWORDS = ["박왕열", "마약왕", "마약왕 박왕열"]  # 모니터링 키워드 (여러 개 가능)
 NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -459,7 +459,7 @@ def clean_title(title: str) -> str:
 def main():
     log.info("=" * 60)
     log.info("F&F 브랜드 이미지 모니터링 시작")
-    log.info(f"키워드: {SEARCH_KEYWORD}")
+    log.info(f"키워드: {', '.join(SEARCH_KEYWORDS)}")
     log.info(f"시각: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S KST')}")
     log.info("=" * 60)
 
@@ -468,15 +468,26 @@ def main():
     analyzed_urls = set(history.get("analyzed_urls", []))
     new_detections = []
 
-    # 1) 네이버 뉴스 검색
-    articles = search_naver_news(SEARCH_KEYWORD, display=DISPLAY_COUNT)
-    if not articles:
+    # 1) 모든 키워드로 네이버 뉴스 검색
+    all_articles = []
+    seen_links = set()
+    for keyword in SEARCH_KEYWORDS:
+        articles = search_naver_news(keyword, display=DISPLAY_COUNT)
+        for art in articles:
+            link = get_naver_link(art)
+            if link not in seen_links:
+                seen_links.add(link)
+                all_articles.append(art)
+    
+    if not all_articles:
         log.warning("수집된 기사가 없습니다. 종료합니다.")
         return
+    
+    log.info(f"전체 키워드에서 중복 제거 후 {len(all_articles)}건 수집")
 
     # 2) 새로운 기사만 필터링
     new_articles = []
-    for art in articles:
+    for art in all_articles:
         url = get_naver_link(art)
         url_hash = hashlib.md5(url.encode()).hexdigest()
         if url_hash not in analyzed_urls:
