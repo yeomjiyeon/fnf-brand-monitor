@@ -1,20 +1,5 @@
 [
   {
-    "timestamp": "2026-04-03T23:34:57.181809+09:00",
-    "article_title": "4월 3일 '뉴스 9' 헤드라인",
-    "article_url": "https://n.news.naver.com/mnews/article/448/0000601332?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/448/2026/04/03/QRCODE_0000601332_002_20260403210512708.jpg",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자를 확인할 수 없음",
-    "description": "QR 코드 이미지로, 뉴스 기사나 사람이 포함된 콘텐츠가 아님",
-    "recommendation": "조치 불필요 - QR 코드 이미지"
-  },
-  {
     "timestamp": "2026-04-03T23:35:02.991710+09:00",
     "article_title": "4월 3일 '뉴스 9' 헤드라인",
     "article_url": "https://n.news.naver.com/mnews/article/448/0000601332?sid=102",
@@ -3109,5 +3094,22 @@
     "cap_description": "이미지에서 모자를 착용한 사람은 보이지 않음",
     "description": "공항이나 터미널 내부에서 마스크를 착용한 세 명이 함께 걷고 있는 모습. 두 명은 경찰복을 착용하고 있으며, 가운데 인물은 일반 복장",
     "recommendation": "브랜드 로고나 팀 로고가 발견되지 않아 추가 조치 불필요"
+  },
+  {
+    "timestamp": "2026-04-04T16:55:15.310959+09:00",
+    "article_title": "'필리핀 마약왕' 박왕열 조카 국내 송환 추진",
+    "article_url": "https://www.obsnews.co.kr/news/articleView.html?idxno=1519786",
+    "image_url": "https://cdn.obsnews.co.kr/news/thumbnail/202604/1519786_718754_356_v150.jpg",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "중앙 인물이 착용한 검정색 모자에 뉴욕 양키스 NY 로고가 선명하게 노출되어 있음",
+    "description": "언론 인터뷰 상황으로 보이는 장면에서 중앙 인물이 NY 양키스 로고가 있는 모자를 착용하고 있음",
+    "recommendation": "모자의 NY 양키스 로고에 대한 모자이크 또는 블러 처리 필요"
   }
 ]
