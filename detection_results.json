@@ -1,20 +1,5 @@
 [
   {
-    "timestamp": "2026-04-03T23:37:28.861658+09:00",
-    "article_title": "경찰, ‘마약왕’ 박왕열 구속 송치…범행 규모 130억원대",
-    "article_url": "https://n.news.naver.com/mnews/article/081/0003632220?sid=102",
-    "image_url": "https://mimgnews.pstatic.net/image/origin/081/2026/04/03/3632216.jpg?type&#x3D;nfs284_284",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자를 착용하지 않음",
-    "description": "정장 차림의 남성이 안경을 착용하고 있으며, 어두운 색상의 정장과 줄무늬 셔츠, 넥타이를 착용한 모습",
-    "recommendation": "조치 불필요 - 브랜드 로고나 모자 없음"
-  },
-  {
     "timestamp": "2026-04-03T23:37:36.675376+09:00",
     "article_title": "'남양유업 외손녀' 황하나, 버닝썬 단골?…경찰 &quot;박왕열 연루 확인되면...",
     "article_url": "https://n.news.naver.com/mnews/article/448/0000601204?sid=102",
@@ -3112,5 +3097,20 @@
     "cap_description": "이미지에서 모자를 착용한 인물이 보이지 않음",
     "description": "두 명의 남성이 라디오 방송 스튜디오에서 대화하고 있는 장면. 왼쪽 인물은 검은색 정장, 오른쪽 인물은 흰색 셔츠를 착용하고 있으며 둘 다 모자를 쓰지 않음",
     "recommendation": "브랜드 로고나 상표가 발견되지 않아 별도 조치 불필요"
+  },
+  {
+    "timestamp": "2026-04-05T06:59:06.840227+09:00",
+    "article_title": "&quot;뻔뻔하다&quot; 故김창민 감독 가해자, 힙합곡 발매..가사에 '분노' [스타이...",
+    "article_url": "https://www.starnewskorea.com/star/2026/04/05/2026040410253634718",
+    "image_url": "https://image.starnewskorea.com/cdn-cgi/image/f=auto,w=1200,h=1164,fit=cover,q=high,sharpen=2/21/2026/04/2026040410253634718_1.jpg",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자를 착용하지 않음",
+    "description": "안경을 쓰고 마스크를 착용한 사람이 열대 식물 패턴의 셔츠를 입고 분홍색 서류를 들고 있는 모습",
+    "recommendation": "브랜드 로고가 발견되지 않아 조치가 필요하지 않음"
   }
 ]
