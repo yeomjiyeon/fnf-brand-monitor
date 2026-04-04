@@ -1,84 +1,5 @@
 [
   {
-    "timestamp": "2026-04-03T23:33:35.756567+09:00",
-    "article_title": "박왕열, 1년 만에 마약왕...범행 규모 131억 상당&quot;",
-    "article_url": "https://n.news.naver.com/mnews/article/052/0002336200?sid=102",
-    "image_url": "https://mimgnews.pstatic.net/image/origin/052/2026/04/03/2335941.jpg?type&#x3D;nfs284_284",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자 착용하지 않음",
-    "description": "정장을 입고 안경을 착용한 남성이 마이크 앞에서 연설하는 공식적인 기자회견 또는 발표 장면",
-    "recommendation": "조치 불필요"
-  },
-  {
-    "timestamp": "2026-04-03T23:33:42.722475+09:00",
-    "article_title": "박왕열, 1년 만에 마약왕...범행 규모 131억 상당&quot;",
-    "article_url": "https://n.news.naver.com/mnews/article/052/0002336200?sid=102",
-    "image_url": "https://mimgnews.pstatic.net/image/origin/052/2026/04/03/2335809.jpg?type&#x3D;nfs284_284",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "이미지에서 모자를 착용한 인물이 보이지 않음",
-    "description": "실내에서 두 명의 인물이 앉아있고, 한 명이 흰색 강아지를 안고 있는 모습. 배경에 다른 인물들이 서있음. 모자나 MLB 관련 브랜드 로고는 보이지 않음",
-    "recommendation": "브랜드 로고나 모자가 확인되지 않아 추가 조치 불필요"
-  },
-  {
-    "timestamp": "2026-04-03T23:33:49.912818+09:00",
-    "article_title": "경찰, ‘마약왕’ 박왕열 구속 송치…&quot;범죄 수익 끝까지 추적&quot;",
-    "article_url": "https://n.news.naver.com/mnews/article/022/0004118114?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/022/2026/04/03/20260403510816_20260403223210906.jpg?type&#x3D;w800",
-    "logo_detected": true,
-    "logo_status": "exposed",
-    "confidence": "high",
-    "detected_brands": [
-      "텍스트 브랜드"
-    ],
-    "risk_level": "medium",
-    "cap_detected": true,
-    "cap_description": "검은색 모자에 흰색 텍스트로 브랜드명이나 문구가 선명하게 새겨져 있음",
-    "description": "경찰에 의해 호송되는 남성이 검은색 모자를 착용하고 있으며, 모자에 브랜드 텍스트가 선명하게 노출되어 있음",
-    "recommendation": "모자의 브랜드 텍스트를 모자이크나 블러 처리하여 브랜드 노출을 방지할 것을 권장"
-  },
-  {
-    "timestamp": "2026-04-03T23:33:55.041942+09:00",
-    "article_title": "경찰, ‘마약왕’ 박왕열 구속 송치…&quot;범죄 수익 끝까지 추적&quot;",
-    "article_url": "https://n.news.naver.com/mnews/article/022/0004118114?sid=102",
-    "image_url": "https://mimgnews.pstatic.net/image/upload/spubs/NNG0000022/profile/2025/08/06/profile_145434880.jpg?type&#x3D;nf112_112",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자 착용하지 않음",
-    "description": "정장 차림의 남성이 안경을 착용하고 있는 공식적인 인물 사진",
-    "recommendation": "브랜드 로고가 없어 조치 불필요"
-  },
-  {
-    "timestamp": "2026-04-03T23:34:00.917200+09:00",
-    "article_title": "경찰, ‘마약왕’ 박왕열 구속 송치…&quot;범죄 수익 끝까지 추적&quot;",
-    "article_url": "https://n.news.naver.com/mnews/article/022/0004118114?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/022/2026/04/03/20260403510816_20260403223210906.jpg?type&#x3D;w860",
-    "logo_detected": true,
-    "logo_status": "exposed",
-    "confidence": "high",
-    "detected_brands": [
-      "브랜드 텍스트"
-    ],
-    "risk_level": "medium",
-    "cap_detected": true,
-    "cap_description": "검은색 모자에 흰색 텍스트로 브랜드명이나 문구가 선명하게 새겨져 있음",
-    "description": "경찰복을 입은 관계자들과 함께 있는 남성이 검은색 모자를 착용하고 있으며, 모자에 브랜드 텍스트가 선명하게 노출되어 있음",
-    "recommendation": "모자의 브랜드 텍스트 부분에 모자이크 또는 블러 처리 필요"
-  },
-  {
     "timestamp": "2026-04-03T23:34:06.677570+09:00",
     "article_title": "경찰, ‘마약왕’ 박왕열 구속 송치…&quot;범죄 수익 끝까지 추적&quot;",
     "article_url": "https://n.news.naver.com/mnews/article/022/0004118114?sid=102",
@@ -3108,5 +3029,85 @@
     "cap_description": "왼쪽 인물이 착용한 파란색 야구모자에 MLB 관련 로고가 선명하게 노출되어 있음",
     "description": "두 명의 인물이 마스크를 착용하고 있는 뉴스 이미지로, 왼쪽 인물은 파란색 MLB 야구모자를 착용하고 있으며, 오른쪽 인물은 검은색 버킷햇을 착용하고 있음",
     "recommendation": "왼쪽 인물의 파란색 모자에 있는 MLB 로고를 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-04T09:02:35.258736+09:00",
+    "article_title": "옥중에서도 멈추지 않은 '탈북 마약왕' 최정옥…대규모 밀반입 지휘",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008869880?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/04/0008869880_001_20260404084610164.jpg?type&#x3D;w800",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 모자에 뉴욕 양키스 NY 로고가 선명하게 노출되어 있음",
+    "description": "경찰에 의해 호송되는 남성이 NY 양키스 로고가 있는 검은색 모자를 착용하고 있는 뉴스 장면",
+    "recommendation": "모자의 NY 양키스 로고를 모자이크 또는 블러 처리하여 브랜드 노출을 차단해야 함"
+  },
+  {
+    "timestamp": "2026-04-04T09:02:40.782983+09:00",
+    "article_title": "옥중에서도 멈추지 않은 '탈북 마약왕' 최정옥…대규모 밀반입 지휘",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008869880?sid=102",
+    "image_url": "https://mimgnews.pstatic.net/image/upload/journalist/2020/04/08/00331.jpg?type&#x3D;nf112_112",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자를 착용하지 않음",
+    "description": "정장 차림의 남성이 안경을 착용하고 있으며, 회색 재킷과 흰색 셔츠를 입고 있음. 모자나 특별한 브랜드 로고는 보이지 않음",
+    "recommendation": "조치 불필요"
+  },
+  {
+    "timestamp": "2026-04-04T09:02:47.029981+09:00",
+    "article_title": "옥중에서도 멈추지 않은 '탈북 마약왕' 최정옥…대규모 밀반입 지휘",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008869880?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/04/0008869880_001_20260404084610164.jpg?type&#x3D;w860",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees",
+      "MLB"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 뉴욕 양키스 모자에 흰색 NY 로고가 선명하게 노출되어 있음",
+    "description": "경찰에 의해 연행되는 인물이 뉴욕 양키스 모자를 착용하고 있으며, NY 로고가 명확히 보임",
+    "recommendation": "모자의 NY 로고에 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-04T09:02:52.456693+09:00",
+    "article_title": "옥중에서도 멈추지 않은 '탈북 마약왕' 최정옥…대규모 밀반입 지휘",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008869880?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/04/QRCODE_0008869880_001_20260404084610391.jpg",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자가 감지되지 않음",
+    "description": "QR 코드 이미지로, 사람이나 의류, 모자 등이 포함되지 않은 단순한 바코드 형태의 이미지",
+    "recommendation": "조치 불필요 - 브랜드 로고나 모자가 없는 QR 코드 이미지"
+  },
+  {
+    "timestamp": "2026-04-04T09:02:58.384759+09:00",
+    "article_title": "옥중에서도 멈추지 않은 '탈북 마약왕' 최정옥…대규모 밀반입 지휘",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008869880?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/04/QRCODE_0008869880_002_20260404084610464.jpg",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자가 보이지 않음",
+    "description": "QR 코드 이미지로, 사람이나 의류, 모자 등이 포함되지 않은 단순한 QR 코드",
+    "recommendation": "조치 불필요 - 브랜드 로고나 모자가 없는 QR 코드 이미지"
   }
 ]
