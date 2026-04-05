@@ -1,161 +1,5 @@
 [
   {
-    "timestamp": "2026-04-03T23:42:10.352745+09:00",
-    "article_title": "경찰, '마약왕' 박왕열 '131억 마약 유통·밀수' 구속 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/448/0000601196?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/448/2026/04/03/2026040390131_0_20260403123517437.jpg?type&#x3D;w860",
-    "logo_detected": true,
-    "logo_status": "exposed",
-    "confidence": "high",
-    "detected_brands": [
-      "New York Yankees"
-    ],
-    "risk_level": "high",
-    "cap_detected": true,
-    "cap_description": "검은색 야구모자에 뉴욕 양키스의 'NY' 로고가 선명하게 노출되어 있음",
-    "description": "남성이 검은색 뉴욕 양키스 모자를 착용하고 있는 모습, NY 로고가 명확히 보임",
-    "recommendation": "뉴욕 양키스 NY 로고에 모자이크 처리 필요"
-  },
-  {
-    "timestamp": "2026-04-03T23:42:14.827884+09:00",
-    "article_title": "경찰, '마약왕' 박왕열 '131억 마약 유통·밀수' 구속 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/448/0000601196?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/448/2026/04/03/QRCODE_0000601196_001_20260403123517515.jpg",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자가 감지되지 않음",
-    "description": "QR 코드 이미지로 뉴스 기사나 사람, 의류, 모자 등이 포함되지 않음",
-    "recommendation": "조치 불필요 - QR 코드 이미지"
-  },
-  {
-    "timestamp": "2026-04-03T23:42:19.295197+09:00",
-    "article_title": "경찰, '마약왕' 박왕열 '131억 마약 유통·밀수' 구속 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/448/0000601196?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/448/2026/04/03/QRCODE_0000601196_002_20260403123517596.jpg",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자가 감지되지 않음",
-    "description": "QR 코드 이미지로, 뉴스 기사나 사람이 포함되지 않은 단순한 QR 코드",
-    "recommendation": "브랜드 로고나 모자가 없으므로 조치 불필요"
-  },
-  {
-    "timestamp": "2026-04-04T01:06:35.781309+09:00",
-    "article_title": "“131억대 마약 유통” 박왕열 검찰 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/023/0003968802?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/023/2026/04/04/0003968802_001_20260404004908650.jpg?type&#x3D;w800",
-    "logo_detected": true,
-    "logo_status": "exposed",
-    "confidence": "high",
-    "detected_brands": [
-      "NY Yankees"
-    ],
-    "risk_level": "high",
-    "cap_detected": true,
-    "cap_description": "네이비 색상의 야구 모자에 흰색 NY 로고가 선명하게 노출되어 있음",
-    "description": "남성이 네이비 색상의 뉴욕 양키스 모자를 착용하고 있으며, 모자의 NY 로고가 명확하게 보임",
-    "recommendation": "모자의 NY 로고에 모자이크 또는 블러 처리 필요"
-  },
-  {
-    "timestamp": "2026-04-04T01:06:43.238256+09:00",
-    "article_title": "“131억대 마약 유통” 박왕열 검찰 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/023/0003968802?sid=102",
-    "image_url": "https://mimgnews.pstatic.net/image/upload/spubs/zbG0000023/profile/2024/05/02/profile_110202903.jpg?type&#x3D;nf112_112",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자를 착용하지 않음",
-    "description": "정장 차림의 남성이 네이비 정장, 스트라이프 셔츠, 패턴 넥타이를 착용한 공식적인 인물 사진",
-    "recommendation": "조치 불필요 - 브랜드 로고나 모자가 확인되지 않음"
-  },
-  {
-    "timestamp": "2026-04-04T01:06:48.004626+09:00",
-    "article_title": "“131억대 마약 유통” 박왕열 검찰 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/023/0003968802?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/023/2026/04/04/0003968802_001_20260404004908650.jpg?type&#x3D;w860",
-    "logo_detected": true,
-    "logo_status": "exposed",
-    "confidence": "high",
-    "detected_brands": [
-      "NY Yankees"
-    ],
-    "risk_level": "high",
-    "cap_detected": true,
-    "cap_description": "검은색 야구 모자에 흰색 NY 로고가 선명하게 노출됨",
-    "description": "남성이 검은색 뉴욕 양키스 야구 모자를 착용한 모습",
-    "recommendation": "모자의 NY 로고를 모자이크 또는 블러 처리 필요"
-  },
-  {
-    "timestamp": "2026-04-04T01:06:52.257121+09:00",
-    "article_title": "“131억대 마약 유통” 박왕열 검찰 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/023/0003968802?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/023/2026/04/04/QRCODE_0003968802_001_20260404004908873.jpg",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자가 감지되지 않음",
-    "description": "QR 코드 이미지로, 사람이나 의류, 모자 등이 포함되지 않은 단순한 QR 코드",
-    "recommendation": "조치 불필요 - 브랜드 로고나 모자가 없음"
-  },
-  {
-    "timestamp": "2026-04-04T01:06:57.023179+09:00",
-    "article_title": "“131억대 마약 유통” 박왕열 검찰 송치",
-    "article_url": "https://n.news.naver.com/mnews/article/023/0003968802?sid=102",
-    "image_url": "https://imgnews.pstatic.net/image/023/2026/04/04/QRCODE_0003968802_002_20260404004908946.jpg",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자가 보이지 않음",
-    "description": "QR 코드 이미지로 사람이나 의류, 모자 등이 포함되지 않은 단순한 바코드 형태의 이미지",
-    "recommendation": "브랜드 로고 관련 조치 불필요"
-  },
-  {
-    "timestamp": "2026-04-04T01:07:03.822320+09:00",
-    "article_title": "4월 3일 모닝뉴스 헤드라인",
-    "article_url": "https://www.radiokorea.com/news/article.php?uid=492704",
-    "image_url": "https://rk-thumb.s3.us-west-2.amazonaws.com/www/news/recomm_photo_492699.jpg",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "모자가 착용되지 않음",
-    "description": "정장 차림의 남성이 실내 계단 앞에 서 있는 비즈니스 이미지, 어두운 정장과 줄무늬 넥타이 착용",
-    "recommendation": "조치 불필요"
-  },
-  {
-    "timestamp": "2026-04-04T01:07:11.172098+09:00",
-    "article_title": "[박정훈 칼럼] “한국민 건들면 지구 끝 추적”, 북·중은 빼고",
-    "article_url": "https://n.news.naver.com/mnews/article/023/0003968737?sid=110",
-    "image_url": "https://imgnews.pstatic.net/image/023/2026/04/03/0003968737_001_20260403235608165.png?type&#x3D;w800",
-    "logo_detected": false,
-    "logo_status": "none",
-    "confidence": "high",
-    "detected_brands": [],
-    "risk_level": "none",
-    "cap_detected": false,
-    "cap_description": "이미지에서 모자를 착용한 인물은 없음",
-    "description": "북한 억류 한국 국정자 현황을 보여주는 뉴스 이미지로, 4명의 인물 사진과 3명의 실루엣이 표시되어 있음. 모든 인물은 정장 차림이며 모자를 착용하지 않음",
-    "recommendation": "브랜드 로고나 상표가 노출되지 않아 별도 조치 불필요"
-  },
-  {
     "timestamp": "2026-04-04T01:07:17.871474+09:00",
     "article_title": "[박정훈 칼럼] “한국민 건들면 지구 끝 추적”, 북·중은 빼고",
     "article_url": "https://n.news.naver.com/mnews/article/023/0003968737?sid=110",
@@ -3128,5 +2972,170 @@
     "cap_description": "이미지에서 모자를 착용한 사람은 보이지 않음",
     "description": "세 명의 사람이 함께 찍은 셀카 사진으로, 모두 학교 교복 스타일의 의상을 착용하고 있으며 평화 사인을 하고 있음",
     "recommendation": "브랜드 로고나 상표가 노출되지 않아 별도 조치 불필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:15.036917+09:00",
+    "article_title": "&quot;넌 남자도 아녀&quot; 매섭던 눈빛 잃고 퀭…박왕열, 필로폰 금단 증상 왔나",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008871048?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/05/0008871048_001_20260405165413852.jpg?type&#x3D;w800",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 뉴욕 양키스 모자에 금색 NY 로고가 선명하게 노출되어 있음",
+    "description": "경찰에 연행되는 인물이 뉴욕 양키스 모자를 착용한 모습",
+    "recommendation": "모자의 NY 로고를 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:21.002895+09:00",
+    "article_title": "&quot;넌 남자도 아녀&quot; 매섭던 눈빛 잃고 퀭…박왕열, 필로폰 금단 증상 왔나",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008871048?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/05/0008871048_001_20260405165413852.jpg?type&#x3D;w860",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "New York Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 모자에 뉴욕 양키스의 'NY' 로고가 선명하게 노출되어 있으며, 모자 테두리에 추가 텍스트도 보임",
+    "description": "경찰에 의해 호송되는 인물이 뉴욕 양키스 로고가 선명한 검은색 모자를 착용하고 있는 뉴스 이미지",
+    "recommendation": "MLB 뉴욕 양키스 로고에 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:27.978731+09:00",
+    "article_title": "&quot;넌 남자도 아녀&quot; 매섭던 눈빛 잃고 퀭…박왕열, 필로폰 금단 증상 왔나",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008871048?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/05/0008871048_002_20260405165413953.jpg?type&#x3D;w860",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 야구 모자에 흰색 NY 로고가 선명하게 노출되어 있음",
+    "description": "기자회견 또는 인터뷰 현장에서 남성이 NY 양키스 로고가 있는 검은색 모자를 착용하고 있는 모습",
+    "recommendation": "모자의 NY 로고를 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:32.560778+09:00",
+    "article_title": "&quot;넌 남자도 아녀&quot; 매섭던 눈빛 잃고 퀭…박왕열, 필로폰 금단 증상 왔나",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008871048?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/05/QRCODE_0008871048_001_20260405165414104.jpg",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자가 감지되지 않음",
+    "description": "QR 코드 이미지로, 사람이나 의류, 모자 등이 포함되지 않은 단순한 바코드 형태의 이미지",
+    "recommendation": "브랜드 로고나 모자 관련 조치 불필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:38.427650+09:00",
+    "article_title": "&quot;넌 남자도 아녀&quot; 매섭던 눈빛 잃고 퀭…박왕열, 필로폰 금단 증상 왔나",
+    "article_url": "https://n.news.naver.com/mnews/article/421/0008871048?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/421/2026/04/05/QRCODE_0008871048_002_20260405165414177.jpg",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자가 감지되지 않음",
+    "description": "QR 코드 이미지로 뉴스 기사나 사람, 의류, 모자 등이 포함되지 않은 단순한 QR 코드",
+    "recommendation": "조치 불필요 - 브랜드 로고나 모자가 없음"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:44.737698+09:00",
+    "article_title": "'퀭'...'휘적휘적' 눈에 띄게 달라진 박왕열 &quot;금단 증상 같아&quot;",
+    "article_url": "https://n.news.naver.com/mnews/article/018/0006250526?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/018/2026/04/05/0006250526_001_20260405162910186.jpg?type&#x3D;w800",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 야구모자에 뉴욕 양키스 NY 로고가 선명하게 노출되어 있음",
+    "description": "경찰에 의해 호송되는 남성이 NY 양키스 로고가 있는 검은색 모자를 착용하고 있는 모습",
+    "recommendation": "모자의 NY 로고를 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:51.587381+09:00",
+    "article_title": "'퀭'...'휘적휘적' 눈에 띄게 달라진 박왕열 &quot;금단 증상 같아&quot;",
+    "article_url": "https://n.news.naver.com/mnews/article/018/0006250526?sid=102",
+    "image_url": "https://mimgnews.pstatic.net/image/upload/spubs/w5G0000018/profile/2023/03/27/profile_103317763.jpg?type&#x3D;nf112_112",
+    "logo_detected": false,
+    "logo_status": "none",
+    "confidence": "high",
+    "detected_brands": [],
+    "risk_level": "none",
+    "cap_detected": false,
+    "cap_description": "모자가 착용되지 않음",
+    "description": "분홍색 배경의 일러스트레이션 스타일 인물화. 긴 갈색 머리, 둥근 안경을 착용한 여성의 얼굴과 어깨 부분만 그려져 있음. 실제 사진이 아닌 단순화된 벡터 스타일의 그림",
+    "recommendation": "조치 불필요 - 브랜드 로고나 모자 착용 없음"
+  },
+  {
+    "timestamp": "2026-04-05T17:05:57.294916+09:00",
+    "article_title": "'퀭'...'휘적휘적' 눈에 띄게 달라진 박왕열 &quot;금단 증상 같아&quot;",
+    "article_url": "https://n.news.naver.com/mnews/article/018/0006250526?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/018/2026/04/05/0006250526_001_20260405162910186.jpg?type&#x3D;w860",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 야구모자에 뉴욕 양키스의 'NY' 로고가 선명하게 노출되어 있음",
+    "description": "경찰에 의해 호송되는 남성이 NY 양키스 로고가 있는 검은색 모자를 착용하고 있는 뉴스 이미지",
+    "recommendation": "모자의 NY 로고를 모자이크 또는 블러 처리하여 브랜드 노출을 차단해야 함"
+  },
+  {
+    "timestamp": "2026-04-05T17:06:03.966060+09:00",
+    "article_title": "'퀭'...'휘적휘적' 눈에 띄게 달라진 박왕열 &quot;금단 증상 같아&quot;",
+    "article_url": "https://n.news.naver.com/mnews/article/018/0006250526?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/018/2026/04/05/0006250526_002_20260405162910201.jpg?type&#x3D;w860",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 모자에 뉴욕 양키스의 흰색 NY 로고가 선명하게 노출되어 있음",
+    "description": "남성이 검은색 NY 양키스 모자를 착용하고 있으며, 회색 셔츠와 어두운 조끼를 입고 손짓을 하고 있는 모습",
+    "recommendation": "모자의 NY 로고에 모자이크 또는 블러 처리 필요"
+  },
+  {
+    "timestamp": "2026-04-05T17:06:09.799783+09:00",
+    "article_title": "'퀭'...'휘적휘적' 눈에 띄게 달라진 박왕열 &quot;금단 증상 같아&quot;",
+    "article_url": "https://n.news.naver.com/mnews/article/018/0006250526?sid=102",
+    "image_url": "https://imgnews.pstatic.net/image/018/2026/04/05/0006250526_003_20260405162910214.jpg?type&#x3D;w860",
+    "logo_detected": true,
+    "logo_status": "exposed",
+    "confidence": "high",
+    "detected_brands": [
+      "NY Yankees",
+      "Nike"
+    ],
+    "risk_level": "high",
+    "cap_detected": true,
+    "cap_description": "검은색 야구 모자에 뉴욕 양키스의 'NY' 로고가 선명하게 노출되어 있음",
+    "description": "수사관들과 함께 있는 남성이 NY 양키스 모자와 나이키 후드티를 착용하고 있는 모습",
+    "recommendation": "NY 로고 및 Nike 로고에 모자이크 처리 필요"
   }
 ]
